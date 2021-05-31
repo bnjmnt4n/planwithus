@@ -11,7 +11,7 @@ type YearProps = {
 
 const SEMESTERS = [1, 2];
 
-const Year = ({ year, data, removeModule }: YearProps) => {
+const Year = ({ year, data, removeModule }: YearProps): JSX.Element => {
   return (
     <div>
       <h2>Year {year}</h2>

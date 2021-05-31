@@ -13,7 +13,12 @@ type SemesterProps = {
   removeModule: (toRemove: Module) => void;
 };
 
-const Semester = ({ year, semester, data, removeModule }: SemesterProps) => {
+const Semester = ({
+  year,
+  semester,
+  data,
+  removeModule,
+}: SemesterProps): JSX.Element => {
   return (
     <div>
       <h3>Semester {semester}</h3>

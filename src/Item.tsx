@@ -11,7 +11,7 @@ type ItemProps = {
   onRemove: () => void;
 };
 
-const Item = ({ item, index, onRemove }: ItemProps) => {
+const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
   return (
     <Draggable draggableId={getModuleId(item)} index={index}>
       {(provided, snapshot) => (

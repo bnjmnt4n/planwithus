@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Main from "./Main";
 
-function App() {
+const App = (): JSX.Element => {
   const [modules, setModules] = useState(undefined);
 
   useEffect(() => {
@@ -29,6 +29,6 @@ function App() {
       {modules ? <Main /> : <p>Loading modules</p>}
     </div>
   );
-}
+};
 
 export default App;
