@@ -4,6 +4,7 @@ const grid = 8;
 
 export const getItemStyle = (
   isDragging: boolean,
+  // eslint-disable-next-line
   draggableStyle: any
 ): React.CSSProperties => ({
   // some basic styles to make the items look a bit nicer

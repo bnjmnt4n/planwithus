@@ -8,7 +8,7 @@ import type { DropResult } from "react-beautiful-dnd";
 
 const YEARS = [1, 2, 3, 4];
 
-function Main() {
+const Main = (): JSX.Element => {
   const [state, setState] = useState<Module[]>([
     { year: 1, semester: 1, code: "GER1000" },
   ]);
@@ -56,6 +56,6 @@ function Main() {
       </DragDropContext>
     </div>
   );
-}
+};
 
 export default Main;
