@@ -1,4 +1,8 @@
-# Getting Started with Create React App
+# planwithus
+
+Web application for advanced module planning. View the [WIP demo](https://planwithus.ofcr.se/).
+
+Inspired by [NUSMods](https://nusmods.com/).
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

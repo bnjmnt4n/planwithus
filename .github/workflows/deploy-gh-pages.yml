@@ -51,3 +51,5 @@ jobs:
         with:
           branch: gh-pages
           folder: build
+          git-config-name: GitHub Actions
+          git-config-email: 813865+bnjmnt4n@users.noreply.github.com

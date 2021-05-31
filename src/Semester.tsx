@@ -1,6 +1,7 @@
 import React from "react";
 import { Droppable } from "react-beautiful-dnd";
 import Item from "./Item";
+import { useModuleContext } from "./ModuleContext";
 import { getListStyle } from "./listStyles";
 import { getModuleId } from "./utils";
 
@@ -10,15 +11,11 @@ type SemesterProps = {
   year: number;
   semester: number;
   data: Module[];
-  removeModule: (toRemove: Module) => void;
 };
 
-const Semester = ({
-  year,
-  semester,
-  data,
-  removeModule,
-}: SemesterProps): JSX.Element => {
+const Semester = ({ year, semester, data }: SemesterProps): JSX.Element => {
+  const { removeModule } = useModuleContext();
+
   return (
     <div>
       <h3>Semester {semester}</h3>

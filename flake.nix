@@ -11,7 +11,7 @@
       in rec {
        devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
-            nodejs-14_x
+            nodejs-16_x
             nodePackages.typescript-language-server
             nodePackages.eslint
           ];

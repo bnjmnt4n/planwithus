@@ -1,6 +1,7 @@
 import React from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { getItemStyle } from "./listStyles";
+import { useModuleContext } from "./ModuleContext";
 
 import type { Module } from "./types";
 import { getModuleId } from "./utils";
@@ -12,6 +13,10 @@ type ItemProps = {
 };
 
 const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
+  const { moduleInfo } = useModuleContext();
+
+  const itemInfo = moduleInfo.find((module) => module.moduleCode === item.code);
+
   return (
     <Draggable draggableId={getModuleId(item)} index={index}>
       {(provided, snapshot) => (
@@ -31,8 +36,9 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
             }}
           >
             {item.code}
+            {itemInfo && ` ${itemInfo.title}`}
             <button type="button" onClick={onRemove}>
-              delete
+              Delete
             </button>
           </div>
         </div>
