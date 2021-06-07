@@ -1,3 +1,0 @@
-* TODO Remove soft limit of 100 items and add virtualization
-* DONE Filter currently selected modules in each semester as well
-* DONE Basic styling
