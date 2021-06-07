@@ -4,8 +4,9 @@ import Main from "./Main";
 import type { ModuleCondensed } from "./types";
 
 const App = (): JSX.Element => {
-  const [moduleInfo, setModuleInfo] =
-    useState<ModuleCondensed[] | undefined>(undefined);
+  const [moduleInfo, setModuleInfo] = useState<ModuleCondensed[] | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     let cancelled = false;
