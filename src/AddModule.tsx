@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useCombobox } from "downshift";
+import { useVirtual } from "react-virtual";
 import { useModuleContext } from "./ModuleContext";
 
 import type { Module, ModuleCondensed } from "./types";
@@ -52,8 +53,27 @@ type ComboboxProps = {
 };
 
 const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
+  const [inputValue, setInputValue] = useState<string | undefined>("");
   // TODO: currently capping at the first 100 modules to avoid performance issues when rendering.
-  const [filteredItems, setFilteredItems] = useState(() => items.slice(0, 100));
+  const filteredItems = useMemo(() => {
+    if (inputValue) {
+      return items.filter((item) =>
+        moduleInfoToString(item)
+          .toLowerCase()
+          .includes(inputValue.toLowerCase())
+      );
+    } else {
+      return items;
+    }
+  }, [items, inputValue]);
+
+  const listRef = useRef(null);
+  const rowVirtualizer = useVirtual({
+    size: filteredItems.length,
+    parentRef: listRef,
+    estimateSize: useCallback(() => 50, []),
+    overscan: 3,
+  });
 
   const {
     isOpen,
@@ -64,34 +84,27 @@ const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
     getInputProps,
     getComboboxProps,
     getItemProps,
-    setInputValue,
     openMenu,
     selectItem,
   } = useCombobox({
     items: filteredItems,
+    inputValue,
     itemToString: (item) => (item ? moduleInfoToString(item) : ""),
-    onInputValueChange: ({ inputValue }) => {
-      if (inputValue) {
-        setFilteredItems(
-          items
-            .filter((item) =>
-              moduleInfoToString(item)
-                .toLowerCase()
-                .includes(inputValue.toLowerCase())
-            )
-            .slice(0, 100)
-        );
-      } else {
-        setFilteredItems(items.slice(0, 100));
-      }
+    onInputValueChange: ({ inputValue: newValue }) => {
+      setInputValue(newValue);
     },
     onSelectedItemChange: ({ selectedItem }) => {
       // Trigger callback to add module on selection, and reset the combobox.
       if (selectedItem) {
         onItemSelected(selectedItem);
-        setInputValue("");
         // TODO: better way to reset currently selected item?
         (selectItem as unknown as (item: null) => void)(null);
+        Promise.resolve(undefined).then(() => setInputValue(""));
+      }
+    },
+    onHighlightedIndexChange: ({ highlightedIndex }) => {
+      if (highlightedIndex) {
+        rowVirtualizer.scrollToIndex(highlightedIndex);
       }
     },
   });
@@ -120,20 +133,46 @@ const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
           &#8595;
         </button>
       </div>
-      <ul {...getMenuProps()} className="max-h-80 overflow-auto">
+      <ul
+        {...getMenuProps({ ref: listRef })}
+        className="max-h-80 overflow-auto relative"
+      >
         {isOpen &&
           (filteredItems.length ? (
-            filteredItems.map((item, index) => (
+            <>
               <li
-                className={`p-2 ${
-                  highlightedIndex === index ? "bg-blue-200" : ""
-                }`}
-                key={`${item.moduleCode}`}
-                {...getItemProps({ item, index })}
-              >
-                {moduleInfoToString(item)}
-              </li>
-            ))
+                key="total-size"
+                className="relative w-full"
+                style={{ height: rowVirtualizer.totalSize }}
+              />
+              {rowVirtualizer.virtualItems.map((virtualRow) => (
+                <li
+                  key={filteredItems[virtualRow.index].moduleCode}
+                  className={`px-2 py-3 w-full absolute block ${
+                    highlightedIndex === virtualRow.index ? "bg-blue-200" : ""
+                  }`}
+                  style={{
+                    top: 0,
+                    left: 0,
+                    height: virtualRow.size,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  {...getItemProps({
+                    item: filteredItems[virtualRow.index],
+                    index: virtualRow.index,
+                    ref: (element) => {
+                      console.log(element);
+                      console.log(element?.getBoundingClientRect());
+                      return virtualRow.measureRef(element);
+                    },
+                  })}
+                >
+                  <div className="h-full">
+                    {moduleInfoToString(filteredItems[virtualRow.index])}
+                  </div>
+                </li>
+              ))}
+            </>
           ) : (
             <li>No modules found</li>
           ))}
