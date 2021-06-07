@@ -26,11 +26,17 @@ const App = (): JSX.Element => {
   }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
+    <div className="h-screen flex flex-col">
+      <header className="w-full p-4 text-2xl text-center font-bold">
         <h1>plaNwithUS</h1>
       </header>
-      {moduleInfo ? <Main moduleInfo={moduleInfo} /> : <p>Loading modules</p>}
+      <div className="w-full p-4 flex-grow overflow-x-auto">
+        {moduleInfo ? (
+          <Main moduleInfo={moduleInfo} />
+        ) : (
+          <p className="text-center">Loading modules...</p>
+        )}
+      </div>
     </div>
   );
 };

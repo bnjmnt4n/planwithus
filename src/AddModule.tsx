@@ -97,10 +97,11 @@ const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
   });
 
   return (
-    <div>
+    <div className="w-full">
       <label {...getLabelProps()}>Add module:</label>
       <div {...getComboboxProps()}>
         <input
+          className="p-1 border-2 border-gray-400 rounded"
           {...getInputProps({
             // Open the combobox dropdown on focus.
             onFocus: () => {
@@ -112,22 +113,21 @@ const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
         />
         <button
           type="button"
+          className="px-2 py-1 border-2 border-gray-400 rounded"
           {...getToggleButtonProps()}
           aria-label="Toggle menu"
         >
           &#8595;
         </button>
       </div>
-      <ul {...getMenuProps()}>
+      <ul {...getMenuProps()} className="max-h-80 overflow-auto">
         {isOpen &&
           (filteredItems.length ? (
             filteredItems.map((item, index) => (
               <li
-                style={
-                  highlightedIndex === index
-                    ? { backgroundColor: "#bde4ff" }
-                    : {}
-                }
+                className={`p-2 ${
+                  highlightedIndex === index ? "bg-blue-200" : ""
+                }`}
                 key={`${item.moduleCode}`}
                 {...getItemProps({ item, index })}
               >

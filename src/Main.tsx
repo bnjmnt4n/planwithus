@@ -51,7 +51,7 @@ const Main = ({ moduleInfo }: MainProps): JSX.Element => {
 
   return (
     <ModuleContextProvider value={{ moduleInfo, setSelectedModules }}>
-      <div style={{ display: "flex" }}>
+      <div className="flex flex-row">
         <DragDropContext onDragEnd={onDragEnd}>
           {YEARS.map((year, index) => (
             <Year key={year} year={year} data={transformedData[index]} />
