@@ -39,7 +39,7 @@ const Semester = ({ year, semester, data }: SemesterProps): JSX.Element => {
           </div>
         )}
       </Droppable>
-      <AddModule year={year} semester={semester} />
+      <AddModule year={year} semester={semester} selectedModules={data} />
     </div>
   );
 };

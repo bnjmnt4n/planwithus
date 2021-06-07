@@ -2,19 +2,33 @@ import React, { useMemo, useState } from "react";
 import { useCombobox } from "downshift";
 import { useModuleContext } from "./ModuleContext";
 
-import type { ModuleCondensed } from "./types";
+import type { Module, ModuleCondensed } from "./types";
 
 type AddModuleProps = {
   year: number;
   semester: number;
+  selectedModules: Module[];
 };
 
-export const AddModule = ({ year, semester }: AddModuleProps): JSX.Element => {
+export const AddModule = ({
+  year,
+  semester,
+  selectedModules,
+}: AddModuleProps): JSX.Element => {
   const { moduleInfo, addModule } = useModuleContext();
 
   const filteredModules = useMemo(() => {
-    return moduleInfo.filter((module) => module.semesters.includes(semester));
-  }, [moduleInfo, semester]);
+    return (
+      moduleInfo
+        .filter((module) => module.semesters.includes(semester))
+        // Prevent duplicate selection.
+        .filter((module) =>
+          selectedModules.every(
+            (selectedModule) => module.moduleCode !== selectedModule.code
+          )
+        )
+    );
+  }, [moduleInfo, semester, selectedModules]);
 
   return (
     <div>
