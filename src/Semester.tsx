@@ -6,6 +6,7 @@ import { getListStyle } from "./listStyles";
 import { getModuleId } from "./utils";
 
 import type { Module } from "./types";
+import { AddModule } from "./AddModule";
 
 type SemesterProps = {
   year: number;
@@ -38,6 +39,7 @@ const Semester = ({ year, semester, data }: SemesterProps): JSX.Element => {
           </div>
         )}
       </Droppable>
+      <AddModule year={year} semester={semester} selectedModules={data} />
     </div>
   );
 };
