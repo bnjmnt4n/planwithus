@@ -14,6 +14,7 @@
             nodejs-16_x
             nodePackages.typescript-language-server
             nodePackages.eslint
+            nodePackages.eslint_d
           ];
         };
       });
