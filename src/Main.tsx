@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "react-query";
 import { DragDropContext } from "react-beautiful-dnd";
 import { move, reorder, transform } from "./utils";
 import { ModuleContextProvider } from "./ModuleContext";
@@ -8,10 +9,6 @@ import type { Module, ModuleCondensed } from "./types";
 import type { DropResult } from "react-beautiful-dnd";
 
 const YEARS = [1, 2, 3, 4];
-
-type MainProps = {
-  moduleInfo: ModuleCondensed[];
-};
 
 const getInitialModules = (): Module[] => {
   let modules;
@@ -29,7 +26,17 @@ const getInitialModules = (): Module[] => {
   return modules;
 };
 
-const Main = ({ moduleInfo }: MainProps): JSX.Element => {
+const Main = (): JSX.Element => {
+  const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
+    ["modules"],
+    async () => {
+      const request = await fetch(
+        "https://api.nusmods.com/v2/2021-2022/moduleList.json"
+      );
+      return request.json();
+    }
+  );
+
   const [selectedModules, setSelectedModules] =
     useState<Module[]>(getInitialModules);
 
@@ -67,6 +74,22 @@ const Main = ({ moduleInfo }: MainProps): JSX.Element => {
       setSelectedModules(newState);
     }
   };
+
+  if (status === "loading") {
+    return <div className="text-center">Loading module information...</div>;
+  }
+
+  if (status === "error") {
+    return (
+      <div className="text-center">
+        Error loading module information. Please refresh to try again
+      </div>
+    );
+  }
+
+  if (!moduleInfo) {
+    throw new Error("No module information found");
+  }
 
   return (
     <ModuleContextProvider value={{ moduleInfo, setSelectedModules }}>
