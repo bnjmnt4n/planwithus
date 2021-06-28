@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import { move, reorder, transform } from "./utils";
 import { ModuleContextProvider } from "./ModuleContext";
@@ -13,11 +13,30 @@ type MainProps = {
   moduleInfo: ModuleCondensed[];
 };
 
+const getInitialModules = (): Module[] => {
+  let modules;
+  try {
+    modules = JSON.parse(localStorage.getItem("modules") ?? "[]");
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+
+  if (!modules || !modules.length) {
+    modules = [
+      { year: 1, semester: 1, code: "GER1000" },
+      { year: 1, semester: 1, code: "CS1101S" },
+    ];
+  }
+  return modules;
+};
+
 const Main = ({ moduleInfo }: MainProps): JSX.Element => {
-  const [selectedModules, setSelectedModules] = useState<Module[]>([
-    { year: 1, semester: 1, code: "GER1000" },
-    { year: 1, semester: 1, code: "CS1101S" },
-  ]);
+  const [selectedModules, setSelectedModules] =
+    useState<Module[]>(getInitialModules);
+
+  // Persist modules to `localStorage`.
+  useEffect(() => {
+    localStorage.setItem("modules", JSON.stringify(selectedModules));
+  }, [selectedModules]);
 
   const transformedData = useMemo(
     () => transform(selectedModules),
