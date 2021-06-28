@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Main from "./Main";
 
 import type { ModuleCondensed } from "./types";
@@ -11,8 +11,7 @@ const App = (): JSX.Element => {
   useEffect(() => {
     let cancelled = false;
 
-    // TODO:
-    fetch("https://api.nusmods.com/v2/2020-2021/moduleList.json")
+    fetch("https://api.nusmods.com/v2/2021-2022/moduleList.json")
       .then((request) => request.json())
       .then((moduleInfo) => {
         if (!cancelled) {
