@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "react-query";
+import { useQueries, useQuery } from "react-query";
 import { DragDropContext } from "react-beautiful-dnd";
-import { move, reorder, transform } from "./utils";
+import { checkPrerequisites, move, reorder, transform } from "./utils";
 import { ModuleContextProvider } from "./ModuleContext";
 import Year from "./Year";
 
@@ -40,6 +40,19 @@ const Main = (): JSX.Element => {
   const [selectedModules, setSelectedModules] =
     useState<Module[]>(getInitialModules);
 
+  // Fetch detailed information about each individual module, including prerequisite tree.
+  const individualModuleInformation = useQueries(
+    selectedModules.map((module) => ({
+      queryKey: ["module", module.code],
+      queryFn: async () => {
+        const request = await fetch(
+          `https://api.nusmods.com/v2/2021-2022/modules/${module.code}.json`
+        );
+        return request.json();
+      },
+    }))
+  );
+
   // Persist modules to `localStorage`.
   useEffect(() => {
     localStorage.setItem("modules", JSON.stringify(selectedModules));
@@ -48,6 +61,11 @@ const Main = (): JSX.Element => {
   const transformedData = useMemo(
     () => transform(selectedModules),
     [selectedModules]
+  );
+
+  const { checked, modules } = useMemo(
+    () => checkPrerequisites(transformedData, individualModuleInformation),
+    [individualModuleInformation, transformedData]
   );
 
   const onDragEnd = ({ source, destination }: DropResult): void => {
@@ -92,7 +110,7 @@ const Main = (): JSX.Element => {
   }
 
   return (
-    <ModuleContextProvider value={{ moduleInfo, setSelectedModules }}>
+    <ModuleContextProvider value={{ modules, moduleInfo, setSelectedModules }}>
       <div className="flex flex-row">
         <DragDropContext onDragEnd={onDragEnd}>
           {YEARS.map((year, index) => (
@@ -100,6 +118,7 @@ const Main = (): JSX.Element => {
           ))}
         </DragDropContext>
       </div>
+      <div>{!checked && "Failed to do pre-requisite checking"}</div>
     </ModuleContextProvider>
   );
 };

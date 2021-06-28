@@ -4,6 +4,7 @@ import { removeModule as removeModuleUtil } from "./utils";
 import type { Module, ModuleCondensed } from "./types";
 
 type ModuleContextValue = {
+  modules: Module[];
   moduleInfo: ModuleCondensed[];
   addModule: (module: Module) => void;
   removeModule: (module: Module) => void;
@@ -16,6 +17,7 @@ const ModuleContext = createContext<ModuleContextValue>(
 type ModuleContextProviderProps = {
   children: React.ReactNode;
   value: {
+    modules: Module[];
     setSelectedModules: (value: React.SetStateAction<Module[]>) => void;
     moduleInfo: ModuleContextValue["moduleInfo"];
   };
@@ -29,7 +31,7 @@ export const ModuleContextProvider = ({
   value,
   children,
 }: ModuleContextProviderProps): JSX.Element => {
-  const { moduleInfo, setSelectedModules } = value;
+  const { modules, moduleInfo, setSelectedModules } = value;
 
   const addModule = useCallback(
     (module: Module) => {
@@ -47,11 +49,12 @@ export const ModuleContextProvider = ({
 
   const moduleData = useMemo(
     () => ({
+      modules,
       moduleInfo,
       addModule,
       removeModule,
     }),
-    [moduleInfo, addModule, removeModule]
+    [modules, moduleInfo, addModule, removeModule]
   );
 
   return (
