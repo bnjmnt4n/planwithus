@@ -1,5 +1,5 @@
 import { DraggableLocation } from "react-beautiful-dnd";
-import type { Module, ModuleCondensed } from "./types";
+import type { Module } from "./types";
 
 /**
  * Transforms a flat array of modules into a 3-dimensional array of modules.
@@ -117,6 +117,7 @@ export const getModuleId = ({ code, semester, year }: Module): string => {
   return `${year}-${semester}-${code}`;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const cleanQueries = (queries: any[]): any[] | null => {
   const data = [];
 
