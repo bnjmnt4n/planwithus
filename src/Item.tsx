@@ -1,4 +1,6 @@
 import { Draggable } from "react-beautiful-dnd";
+import { IconButton } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
 import { getItemStyle } from "./listStyles";
 import { useModuleContext } from "./ModuleContext";
 
@@ -40,9 +42,9 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
             >
               {item.code}
               {itemInfo && ` ${itemInfo.title}`}
-              <button type="button" onClick={onRemove}>
-                Delete
-              </button>
+              <IconButton aria-label="delete" onClick={onRemove}>
+                <DeleteIcon />
+              </IconButton>
             </div>
             {missingPrerequisites && (
               <p>
