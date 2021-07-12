@@ -1,4 +1,4 @@
-import React from "react";
+import { Grid } from "@material-ui/core";
 import Semester from "./Semester";
 
 import type { Module } from "./types";
@@ -12,7 +12,7 @@ const SEMESTERS = [1, 2];
 
 const Year = ({ year, data }: YearProps): JSX.Element => {
   return (
-    <div>
+    <Grid item>
       <h2 className="text-xl font-bold">Year {year}</h2>
       <div className="flex flex-row">
         {SEMESTERS.map((semester, index) => (
@@ -24,7 +24,7 @@ const Year = ({ year, data }: YearProps): JSX.Element => {
           />
         ))}
       </div>
-    </div>
+    </Grid>
   );
 };
 
