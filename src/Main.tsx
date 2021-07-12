@@ -31,7 +31,6 @@ const getInitialModules = (): Module[] => {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    flexWrap: "nowrap",
     padding: theme.spacing(3),
   },
 }));
@@ -122,7 +121,13 @@ const Main = (): JSX.Element => {
 
   return (
     <ModuleContextProvider value={{ modules, moduleInfo, setSelectedModules }}>
-      <Grid container direction="row" className={classes.root} spacing={3}>
+      <Grid
+        container
+        direction="row"
+        wrap="nowrap"
+        className={classes.root}
+        spacing={3}
+      >
         <DragDropContext onDragEnd={onDragEnd}>
           {YEARS.map((year, index) => (
             <Year key={year} year={year} data={transformedData[index]} />
