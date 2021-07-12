@@ -9,6 +9,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  makeStyles,
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
@@ -61,7 +62,15 @@ type ComboboxProps = {
   onItemSelected: (module: ModuleCondensed) => void;
 };
 
+const useComboboxStyles = makeStyles(() => ({
+  menu: {
+    overflow: "auto",
+    maxHeight: "300px",
+  },
+}));
+
 const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
+  const classes = useComboboxStyles();
   // TODO: currently capping at the first 100 modules to avoid performance issues when rendering.
   const [filteredItems, setFilteredItems] = useState(() => items.slice(0, 100));
 
@@ -126,7 +135,7 @@ const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
           <ExpandMoreIcon />
         </IconButton>
       </div>
-      <List {...getMenuProps()}>
+      <List {...getMenuProps()} className={classes.menu}>
         {isOpen &&
           (filteredItems.length ? (
             filteredItems.map((item, index) => {
