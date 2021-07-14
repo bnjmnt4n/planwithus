@@ -35,8 +35,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Main = (): JSX.Element => {
+export const Main = (): JSX.Element => {
   const classes = useStyles();
+
   const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
     ["modules"],
     async () => {
@@ -110,7 +111,7 @@ const Main = (): JSX.Element => {
   if (status === "error") {
     return (
       <div className="text-center">
-        Error loading module information. Please refresh to try again
+        Error loading module information. Please refresh to try again.
       </div>
     );
   }
@@ -121,22 +122,27 @@ const Main = (): JSX.Element => {
 
   return (
     <ModuleContextProvider value={{ modules, moduleInfo, setSelectedModules }}>
-      <Grid
-        container
-        direction="row"
-        wrap="nowrap"
-        className={classes.root}
-        spacing={3}
-      >
-        <DragDropContext onDragEnd={onDragEnd}>
-          {YEARS.map((year, index) => (
-            <Year key={year} year={year} data={transformedData[index]} />
-          ))}
-        </DragDropContext>
-      </Grid>
-      <div>{!checked && "Failed to do pre-requisite checking"}</div>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="h-screen flex flex-col">
+          <header className="w-full p-4 text-2xl text-center font-bold">
+            <h1>plaNwithUS</h1>
+          </header>
+          <Grid
+            container
+            direction="row"
+            wrap="nowrap"
+            className={classes.root}
+            spacing={3}
+          >
+            {YEARS.map((year, index) => (
+              <Year key={year} year={year} data={transformedData[index]} />
+            ))}
+          </Grid>
+          <div>
+            {!checked && "Failed to do pre-requisite checking for all modules"}
+          </div>
+        </div>
+      </DragDropContext>
     </ModuleContextProvider>
   );
 };
-
-export default Main;
