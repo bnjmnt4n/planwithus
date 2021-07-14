@@ -3,7 +3,7 @@ import { useQueries, useQuery } from "react-query";
 import { DragDropContext } from "react-beautiful-dnd";
 import { Grid, makeStyles } from "@material-ui/core";
 
-import { checkPrerequisites, move, reorder, transform } from "./utils";
+import { checks, move, reorder, transform } from "./utils";
 import { ModuleContextProvider } from "./ModuleContext";
 import Year from "./Year";
 
@@ -71,14 +71,9 @@ export const Main = (): JSX.Element => {
     localStorage.setItem("modules", JSON.stringify(selectedModules));
   }, [selectedModules]);
 
-  const transformedData = useMemo(
-    () => transform(selectedModules),
-    [selectedModules]
-  );
-
-  const { hasAllData, modules } = useMemo(
-    () => checkPrerequisites(transformedData, individualModuleInformation),
-    [individualModuleInformation, transformedData]
+  const { hasAllData, transformedData, modules } = useMemo(
+    () => checks(selectedModules, individualModuleInformation),
+    [selectedModules, individualModuleInformation]
   );
 
   const onDragEnd = ({ source, destination }: DropResult): void => {

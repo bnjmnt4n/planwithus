@@ -7,6 +7,7 @@ export type Module = {
   /** Unique identifier to allow duplicate modules to be selected. */
   index: number;
   missingPrerequisites?: PrerequisiteTree[] | null;
+  duplicate?: boolean;
   // TODO: get the types for this
   moduleInfo: unknown | null;
 };

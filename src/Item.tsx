@@ -18,10 +18,13 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
   const { modules, moduleInfo } = useModuleContext();
 
   const itemInfo = moduleInfo.find((module) => module.moduleCode === item.code);
-  const module = modules.find((module) => module.code === item.code);
+  const module = modules.find(
+    (module) => module.code === item.code && module.index === item.index
+  );
 
   const missingPrerequisites = module?.missingPrerequisites;
   const individualModuleInfo = module?.moduleInfo;
+  const duplicate = module?.duplicate;
 
   return (
     <Draggable draggableId={getModuleId(item)} index={index}>
@@ -46,6 +49,7 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
             </IconButton>
           </div>
           {!individualModuleInfo && <p>Loading module information...</p>}
+          {duplicate && <p>Duplicate module</p>}
           {missingPrerequisites && (
             <p>
               Missing prerequisites:

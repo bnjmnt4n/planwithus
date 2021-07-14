@@ -158,12 +158,48 @@ export const cleanQueries = (
   return { data, hasAllData };
 };
 
-export const checkPrerequisites = (
-  modules: Module[][][],
+export const checks = (
+  modules: Module[],
   queries: unknown[]
-): { hasAllData: boolean; modules: Module[] } => {
+): {
+  hasAllData: boolean;
+  modules: Module[];
+  transformedData: Module[][][];
+} => {
   const { hasAllData, data } = cleanQueries(queries);
 
+  const checkedDupModules = checkDuplicates(modules);
+  const transformedModules = transform(checkedDupModules);
+  const checkedPrereqModules = checkPrerequisites(transformedModules, data);
+
+  return {
+    hasAllData,
+    modules: checkedPrereqModules,
+    transformedData: transformedModules,
+  };
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const checkDuplicates = (modules: Module[]): Module[] => {
+  const seenModulesSet = new Set<string>();
+  return modules.map((module) => {
+    if (seenModulesSet.has(module.code)) {
+      return {
+        ...module,
+        duplicate: true,
+      };
+    }
+
+    seenModulesSet.add(module.code);
+    return {
+      ...module,
+      duplicate: false,
+    };
+  });
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const checkPrerequisites = (modules: Module[][][], data: any[]) => {
   const semesters = modules.flatMap((year) => year);
 
   const checkedSemesters = semesters.map((currSemesterModules, index) => {
@@ -173,6 +209,7 @@ export const checkPrerequisites = (
         : semesters
             .slice(0, index)
             .flatMap((module) => module)
+            .filter((module) => !module.duplicate)
             .map((module) => module.code);
 
     if (!currSemesterModules.length) {
@@ -184,8 +221,9 @@ export const checkPrerequisites = (
         (moduleInfo) => moduleInfo.moduleCode === module.code
       );
       const prerequisiteTree = moduleInfo?.prereqTree;
+      const duplicate = moduleInfo?.duplicate;
 
-      if (prerequisiteTree) {
+      if (!duplicate && prerequisiteTree) {
         const missingPrerequisites = checkPrerequisiteTree(
           prevSemesterModules,
           prerequisiteTree
@@ -204,10 +242,7 @@ export const checkPrerequisites = (
     });
   });
 
-  return {
-    hasAllData,
-    modules: checkedSemesters.flatMap((module) => module),
-  };
+  return checkedSemesters.flatMap((module) => module);
 };
 
 export type PrerequisiteTree =
