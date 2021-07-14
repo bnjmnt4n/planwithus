@@ -1,5 +1,7 @@
 import { Draggable } from "react-beautiful-dnd";
-import { getItemStyle } from "./listStyles";
+import { IconButton, Paper } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { useItemStyles } from "./listStyles";
 import { useModuleContext } from "./ModuleContext";
 
 import type { Module } from "./types";
@@ -12,6 +14,7 @@ type ItemProps = {
 };
 
 const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
+  const classes = useItemStyles();
   const { modules, moduleInfo } = useModuleContext();
 
   const itemInfo = moduleInfo.find((module) => module.moduleCode === item.code);
@@ -22,37 +25,33 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
   return (
     <Draggable draggableId={getModuleId(item)} index={index}>
       {(provided, snapshot) => (
-        <div
+        <Paper
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          style={getItemStyle(
-            snapshot.isDragging,
-            provided.draggableProps.style
-          )}
+          className={snapshot.isDragging ? classes.dragging : classes.idle}
+          elevation={snapshot.isDragging ? 10 : 1}
         >
-          <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-              }}
-            >
-              {item.code}
-              {itemInfo && ` ${itemInfo.title}`}
-              <button type="button" onClick={onRemove}>
-                Delete
-              </button>
-            </div>
-            {missingPrerequisites && (
-              <p>
-                Missing prerequisites:
-                <br />
-                {printMissingPrerequisites(missingPrerequisites)}
-              </p>
-            )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+            }}
+          >
+            {item.code}
+            {itemInfo && ` ${itemInfo.title}`}
+            <IconButton aria-label="delete" onClick={onRemove}>
+              <DeleteIcon />
+            </IconButton>
           </div>
-        </div>
+          {missingPrerequisites && (
+            <p>
+              Missing prerequisites:
+              <br />
+              {printMissingPrerequisites(missingPrerequisites)}
+            </p>
+          )}
+        </Paper>
       )}
     </Draggable>
   );

@@ -1,25 +1,25 @@
-import React from "react";
+import { makeStyles } from "@material-ui/core";
 
-const grid = 8;
+export const useListStyles = makeStyles(() => ({
+  idle: {
+    border: "2px solid transparent",
+    width: 300,
+  },
+  isDraggingOver: {
+    border: "2px solid lightgrey",
+    width: 300,
+  },
+}));
 
-export const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
-  background: isDraggingOver ? "lightblue" : "lightgrey",
-  padding: grid,
-  width: 250,
-});
-
-export const getItemStyle = (
-  isDragging: boolean,
-  draggableStyle: React.CSSProperties | undefined
-): React.CSSProperties => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: grid * 2,
-  margin: `0 0 ${grid}px 0`,
-
-  // change background colour if dragging
-  background: isDragging ? "lightgreen" : "grey",
-
-  // styles we need to apply on draggables
-  ...draggableStyle,
-});
+export const useItemStyles = makeStyles((theme) => ({
+  idle: {
+    userSelect: "none",
+    padding: theme.spacing(2),
+    margin: `${theme.spacing(1)}px 0`,
+  },
+  dragging: {
+    userSelect: "none",
+    padding: theme.spacing(2),
+    margin: `${theme.spacing(1)}px 0}`,
+  },
+}));

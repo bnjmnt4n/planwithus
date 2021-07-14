@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueries, useQuery } from "react-query";
 import { DragDropContext } from "react-beautiful-dnd";
+import { Grid, makeStyles } from "@material-ui/core";
+
 import { checkPrerequisites, move, reorder, transform } from "./utils";
 import { ModuleContextProvider } from "./ModuleContext";
 import Year from "./Year";
@@ -26,7 +28,15 @@ const getInitialModules = (): Module[] => {
   return modules;
 };
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+  },
+}));
+
 const Main = (): JSX.Element => {
+  const classes = useStyles();
   const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
     ["modules"],
     async () => {
@@ -111,13 +121,19 @@ const Main = (): JSX.Element => {
 
   return (
     <ModuleContextProvider value={{ modules, moduleInfo, setSelectedModules }}>
-      <div className="flex flex-row">
+      <Grid
+        container
+        direction="row"
+        wrap="nowrap"
+        className={classes.root}
+        spacing={3}
+      >
         <DragDropContext onDragEnd={onDragEnd}>
           {YEARS.map((year, index) => (
             <Year key={year} year={year} data={transformedData[index]} />
           ))}
         </DragDropContext>
-      </div>
+      </Grid>
       <div>{!checked && "Failed to do pre-requisite checking"}</div>
     </ModuleContextProvider>
   );

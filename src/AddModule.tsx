@@ -1,6 +1,17 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useCombobox } from "downshift";
 import { useModuleContext } from "./ModuleContext";
+
+import {
+  IconButton,
+  Input,
+  FormLabel,
+  List,
+  ListItem,
+  ListItemText,
+  makeStyles,
+} from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import type { Module, ModuleCondensed } from "./types";
 
@@ -51,7 +62,15 @@ type ComboboxProps = {
   onItemSelected: (module: ModuleCondensed) => void;
 };
 
+const useComboboxStyles = makeStyles(() => ({
+  menu: {
+    overflow: "auto",
+    maxHeight: "300px",
+  },
+}));
+
 const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
+  const classes = useComboboxStyles();
   // TODO: currently capping at the first 100 modules to avoid performance issues when rendering.
   const [filteredItems, setFilteredItems] = useState(() => items.slice(0, 100));
 
@@ -98,11 +117,12 @@ const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
 
   return (
     <div className="w-full">
-      <label {...getLabelProps()}>Add module:</label>
+      <FormLabel {...getLabelProps()}>Add modules:</FormLabel>
       <div {...getComboboxProps()}>
-        <input
-          className="p-1 border-2 border-gray-400 rounded"
+        <Input
+          placeholder="Module"
           {...getInputProps({
+            refKey: "inputRef",
             // Open the combobox dropdown on focus.
             onFocus: () => {
               if (!isOpen) {
@@ -111,33 +131,35 @@ const Combobox = ({ items, onItemSelected }: ComboboxProps): JSX.Element => {
             },
           })}
         />
-        <button
-          type="button"
-          className="px-2 py-1 border-2 border-gray-400 rounded"
-          {...getToggleButtonProps()}
-          aria-label="Toggle menu"
-        >
-          &#8595;
-        </button>
+        <IconButton color="secondary" {...getToggleButtonProps()}>
+          <ExpandMoreIcon />
+        </IconButton>
       </div>
-      <ul {...getMenuProps()} className="max-h-80 overflow-auto">
+      <List {...getMenuProps()} className={classes.menu}>
         {isOpen &&
           (filteredItems.length ? (
-            filteredItems.map((item, index) => (
-              <li
-                className={`p-2 ${
-                  highlightedIndex === index ? "bg-blue-200" : ""
-                }`}
-                key={`${item.moduleCode}`}
-                {...getItemProps({ item, index })}
-              >
-                {moduleInfoToString(item)}
-              </li>
-            ))
+            filteredItems.map((item, index) => {
+              return (
+                <ListItem
+                  key={`${item.moduleCode}=${index}`}
+                  className={
+                    index === highlightedIndex ? "bg-blue-200" : undefined
+                  }
+                  {...getItemProps({
+                    item,
+                    index,
+                  })}
+                >
+                  <ListItemText primary={moduleInfoToString(item)} />
+                </ListItem>
+              );
+            })
           ) : (
-            <li>No modules found</li>
+            <ListItem>
+              <ListItemText>No modules found</ListItemText>
+            </ListItem>
           ))}
-      </ul>
+      </List>
     </div>
   );
 };

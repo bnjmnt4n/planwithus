@@ -1,12 +1,12 @@
-import React from "react";
 import { Droppable } from "react-beautiful-dnd";
 import Item from "./Item";
 import { useModuleContext } from "./ModuleContext";
-import { getListStyle } from "./listStyles";
+import { useListStyles } from "./listStyles";
 import { getModuleId } from "./utils";
 
 import type { Module } from "./types";
 import { AddModule } from "./AddModule";
+import { Grid, Typography } from "@material-ui/core";
 
 type SemesterProps = {
   year: number;
@@ -16,15 +16,20 @@ type SemesterProps = {
 
 const Semester = ({ year, semester, data }: SemesterProps): JSX.Element => {
   const { removeModule } = useModuleContext();
+  const classes = useListStyles();
 
   return (
-    <div>
-      <h3>Semester {semester}</h3>
+    <Grid item>
+      <Typography variant="h6">Semester {semester}</Typography>
       <Droppable droppableId={`${year}-${semester}`}>
         {(provided, snapshot) => (
-          <div
+          <Grid
+            container
+            spacing={2}
             ref={provided.innerRef}
-            style={getListStyle(snapshot.isDraggingOver)}
+            className={
+              snapshot.isDraggingOver ? classes.isDraggingOver : classes.idle
+            }
             {...provided.droppableProps}
           >
             {data.map((item, index) => (
@@ -36,11 +41,11 @@ const Semester = ({ year, semester, data }: SemesterProps): JSX.Element => {
               />
             ))}
             {provided.placeholder}
-          </div>
+          </Grid>
         )}
       </Droppable>
       <AddModule year={year} semester={semester} selectedModules={data} />
-    </div>
+    </Grid>
   );
 };
 
