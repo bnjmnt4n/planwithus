@@ -20,7 +20,7 @@ const Year = ({ year, data }: YearProps): JSX.Element => {
             key={semester}
             year={year}
             semester={semester}
-            data={data[index]}
+            modules={data[index]}
           />
         ))}
       </Grid>
