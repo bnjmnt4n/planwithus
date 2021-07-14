@@ -21,6 +21,7 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
   const module = modules.find((module) => module.code === item.code);
 
   const missingPrerequisites = module?.missingPrerequisites;
+  const individualModuleInfo = module?.moduleInfo;
 
   return (
     <Draggable draggableId={getModuleId(item)} index={index}>
@@ -44,6 +45,7 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
               <DeleteIcon />
             </IconButton>
           </div>
+          {!individualModuleInfo && <p>Loading module information...</p>}
           {missingPrerequisites && (
             <p>
               Missing prerequisites:

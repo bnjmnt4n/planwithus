@@ -28,7 +28,13 @@ export const AddModule = ({ year, semester }: AddModuleProps): JSX.Element => {
       <Combobox
         items={moduleInfo}
         onItemSelected={(module) =>
-          addModule({ year, semester, code: module.moduleCode, index: 0 })
+          addModule({
+            year,
+            semester,
+            code: module.moduleCode,
+            index: 0,
+            moduleInfo: null,
+          })
         }
       />
     </div>

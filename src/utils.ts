@@ -139,33 +139,30 @@ export const getModuleId = ({
   return `${code}-${year}-${semester}-${index}`;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const cleanQueries = (queries: any[]): any[] | null => {
+export const cleanQueries = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  queries: any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): { hasAllData: boolean; data: any[] } => {
   const data = [];
+  let hasAllData = true;
 
   for (const query of queries) {
     if (query.status !== "success") {
-      return null;
+      hasAllData = false;
+      continue;
     }
     data.push(query.data);
   }
 
-  return data;
+  return { data, hasAllData };
 };
 
 export const checkPrerequisites = (
   modules: Module[][][],
   queries: unknown[]
-): { checked: boolean; modules: Module[] } => {
-  const data = cleanQueries(queries);
-  if (!data) {
-    return {
-      checked: false,
-      modules: modules
-        .flatMap((semester) => semester)
-        .flatMap((module) => module),
-    };
-  }
+): { hasAllData: boolean; modules: Module[] } => {
+  const { hasAllData, data } = cleanQueries(queries);
 
   const semesters = modules.flatMap((year) => year);
 
@@ -183,9 +180,10 @@ export const checkPrerequisites = (
     }
 
     return currSemesterModules.map((module) => {
-      const prerequisiteTree = data.find(
+      const moduleInfo = data.find(
         (moduleInfo) => moduleInfo.moduleCode === module.code
-      )?.prereqTree;
+      );
+      const prerequisiteTree = moduleInfo?.prereqTree;
 
       if (prerequisiteTree) {
         const missingPrerequisites = checkPrerequisiteTree(
@@ -196,17 +194,18 @@ export const checkPrerequisites = (
         if (missingPrerequisites) {
           return {
             ...module,
+            moduleInfo,
             missingPrerequisites,
           };
         }
       }
 
-      return module;
+      return { ...module, moduleInfo: moduleInfo ?? null };
     });
   });
 
   return {
-    checked: true,
+    hasAllData,
     modules: checkedSemesters.flatMap((module) => module),
   };
 };

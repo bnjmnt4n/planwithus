@@ -19,8 +19,8 @@ const getInitialModules = (): Module[] => {
     // eslint-disable-next-line no-empty
   } catch (e) {
     modules = [
-      { year: 1, semester: 1, code: "GER1000", index: 0 },
-      { year: 1, semester: 1, code: "CS1101S", index: 0 },
+      { year: 1, semester: 1, code: "GER1000", index: 0, moduleInfo: null },
+      { year: 1, semester: 1, code: "CS1101S", index: 0, moduleInfo: null },
     ];
   }
   if (!modules.length) {
@@ -76,7 +76,7 @@ export const Main = (): JSX.Element => {
     [selectedModules]
   );
 
-  const { checked, modules } = useMemo(
+  const { hasAllData, modules } = useMemo(
     () => checkPrerequisites(transformedData, individualModuleInformation),
     [individualModuleInformation, transformedData]
   );
@@ -141,7 +141,8 @@ export const Main = (): JSX.Element => {
             ))}
           </Grid>
           <div>
-            {!checked && "Failed to do pre-requisite checking for all modules"}
+            {!hasAllData &&
+              "Failed to load module information for all selected modules"}
           </div>
         </div>
       </DragDropContext>
