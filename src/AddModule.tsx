@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useCombobox } from "downshift";
 import { useModuleContext } from "./ModuleContext";
 
@@ -13,40 +13,22 @@ import {
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
-import type { Module, ModuleCondensed } from "./types";
+import type { ModuleCondensed } from "./types";
 
 type AddModuleProps = {
   year: number;
   semester: number;
-  selectedModules: Module[];
 };
 
-export const AddModule = ({
-  year,
-  semester,
-  selectedModules,
-}: AddModuleProps): JSX.Element => {
+export const AddModule = ({ year, semester }: AddModuleProps): JSX.Element => {
   const { moduleInfo, addModule } = useModuleContext();
-
-  const filteredModules = useMemo(() => {
-    return (
-      moduleInfo
-        .filter((module) => module.semesters.includes(semester))
-        // Prevent duplicate selection.
-        .filter((module) =>
-          selectedModules.every(
-            (selectedModule) => module.moduleCode !== selectedModule.code
-          )
-        )
-    );
-  }, [moduleInfo, semester, selectedModules]);
 
   return (
     <div>
       <Combobox
-        items={filteredModules}
+        items={moduleInfo}
         onItemSelected={(module) =>
-          addModule({ year, semester, code: module.moduleCode })
+          addModule({ year, semester, code: module.moduleCode, index: 0 })
         }
       />
     </div>

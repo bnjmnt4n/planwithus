@@ -4,6 +4,8 @@ export type Module = {
   year: number;
   semester: number;
   code: string;
+  /** Unique identifier to allow duplicate modules to be selected. */
+  index: number;
   missingPrerequisites?: PrerequisiteTree[] | null;
 };
 

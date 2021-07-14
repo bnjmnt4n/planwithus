@@ -44,7 +44,7 @@ const Semester = ({ year, semester, data }: SemesterProps): JSX.Element => {
           </Grid>
         )}
       </Droppable>
-      <AddModule year={year} semester={semester} selectedModules={data} />
+      <AddModule year={year} semester={semester} />
     </Grid>
   );
 };

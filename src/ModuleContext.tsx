@@ -1,5 +1,8 @@
 import React, { createContext, useCallback, useContext, useMemo } from "react";
-import { removeModule as removeModuleUtil } from "./utils";
+import {
+  addModule as addModuleUtil,
+  removeModule as removeModuleUtil,
+} from "./utils";
 
 import type { Module, ModuleCondensed } from "./types";
 
@@ -35,7 +38,7 @@ export const ModuleContextProvider = ({
 
   const addModule = useCallback(
     (module: Module) => {
-      setSelectedModules((modules) => modules.concat(module));
+      setSelectedModules((modules) => addModuleUtil(modules, module));
     },
     [setSelectedModules]
   );

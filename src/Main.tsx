@@ -13,18 +13,20 @@ import type { DropResult } from "react-beautiful-dnd";
 const YEARS = [1, 2, 3, 4];
 
 const getInitialModules = (): Module[] => {
-  let modules;
+  let modules: Module[];
   try {
     modules = JSON.parse(localStorage.getItem("modules") ?? "[]");
     // eslint-disable-next-line no-empty
-  } catch (e) {}
-
-  if (!modules || !modules.length) {
+  } catch (e) {
     modules = [
-      { year: 1, semester: 1, code: "GER1000" },
-      { year: 1, semester: 1, code: "CS1101S" },
+      { year: 1, semester: 1, code: "GER1000", index: 0 },
+      { year: 1, semester: 1, code: "CS1101S", index: 0 },
     ];
   }
+  if (!modules.length) {
+    modules = [];
+  }
+
   return modules;
 };
 

@@ -14,6 +14,23 @@ export const transform = (modules: Module[]): Module[][][] => {
 };
 
 /**
+ * Adds a module to a list of modules.
+ */
+export const addModule = (modules: Module[], toAdd: Module): Module[] => {
+  const { code } = toAdd;
+  const index =
+    modules.reduce((index, module) => {
+      if (module.code === code) {
+        return Math.max(module.index, index);
+      }
+
+      return index;
+    }, 0) + 1;
+
+  return modules.concat({ ...toAdd, index });
+};
+
+/**
  * Removes a module from a list of modules.
  */
 export const removeModule = (modules: Module[], toRemove: Module): Module[] => {
@@ -113,8 +130,13 @@ export const move = (
 /**
  * Get an ID for a module suitable for use as a React key.
  */
-export const getModuleId = ({ code, semester, year }: Module): string => {
-  return `${year}-${semester}-${code}`;
+export const getModuleId = ({
+  code,
+  semester,
+  year,
+  index,
+}: Module): string => {
+  return `${code}-${year}-${semester}-${index}`;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
