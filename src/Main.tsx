@@ -3,7 +3,7 @@ import { useQueries, useQuery } from "react-query";
 import { DragDropContext } from "react-beautiful-dnd";
 import { Grid, makeStyles } from "@material-ui/core";
 
-import { checks, move, reorder, transform } from "./utils";
+import { checks, move, reorder } from "./utils";
 import { ModuleContextProvider } from "./ModuleContext";
 import Year from "./Year";
 
