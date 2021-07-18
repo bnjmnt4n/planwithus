@@ -2,6 +2,7 @@ import type { Module } from "../types";
 
 export const checkPrerequisites = (
   modules: Module[][][],
+  exemptedModules: Module[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[]
 ): Module[] => {
@@ -30,7 +31,10 @@ export const checkPrerequisites = (
 
       if (!duplicate && prerequisiteTree) {
         const missingPrerequisites = checkPrerequisiteTree(
-          prevSemesterModules,
+          [
+            ...prevSemesterModules,
+            ...exemptedModules.map((module) => module.code),
+          ],
           prerequisiteTree
         );
 

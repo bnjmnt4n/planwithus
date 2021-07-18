@@ -14,32 +14,68 @@ export const getModuleId = ({
 };
 
 /**
- * Get the user's initial list of modules, either from `localStorage` or a default module list.
+ * Get the user's list of selected modules, either from `localStorage` or a default module list.
  */
-export const getInitialModules = (): Module[] => {
-  let modules: Module[];
+export const getSelectedModules = (): Module[] => {
+  let selectedModules: Module[];
   try {
-    modules = JSON.parse(localStorage.getItem("modules") ?? "[]");
+    selectedModules = JSON.parse(localStorage.getItem("modules") ?? "[]");
   } catch (e) {
-    modules = [
+    selectedModules = [
       { year: 1, semester: 1, code: "GER1000", index: 0, moduleInfo: null },
       { year: 1, semester: 1, code: "CS1101S", index: 0, moduleInfo: null },
     ];
   }
-  if (!modules.length) {
-    modules = [];
+  if (!selectedModules.length) {
+    selectedModules = [];
   }
 
-  return modules;
+  return selectedModules;
+};
+
+/**
+ * Get the user's list of exempted modules, either from `localStorage` or a default module list.
+ */
+export const getExemptedModules = (): Module[] => {
+  let exemptedModules: Module[];
+  try {
+    exemptedModules = JSON.parse(
+      localStorage.getItem("exemptedModules") ?? "[]"
+    );
+  } catch (e) {
+    exemptedModules = [
+      { year: 1, semester: 1, code: "CS1010", index: 0, moduleInfo: null },
+    ];
+  }
+  if (!exemptedModules.length) {
+    exemptedModules = [];
+  }
+
+  return exemptedModules;
+};
+
+/**
+ * Persists modules to `localStorage`.
+ */
+export const persistModules = (
+  selectedModules: Module[],
+  exemptedModules: Module[]
+): void => {
+  localStorage.setItem("modules", JSON.stringify(selectedModules));
+  localStorage.setItem("exemptedModules", JSON.stringify(exemptedModules));
 };
 
 /**
  * Adds a module to a list of modules.
  */
-export const addModule = (modules: Module[], toAdd: Module): Module[] => {
+export const addModule = (
+  modules: Module[],
+  otherModules: Module[],
+  toAdd: Module
+): Module[] => {
   const { code } = toAdd;
   const index =
-    modules.reduce((index, module) => {
+    modules.concat(otherModules).reduce((index, module) => {
       if (module.code === code) {
         return Math.max(module.index, index);
       }
@@ -71,32 +107,47 @@ type IntermediateReorderModules = {
 };
 
 /**
- * Reorders the position of a specific module in a given year/semester pair.
+ * Reorders the position of a specific module in a given semester.
  */
 export const reorder = (
-  modules: Module[],
+  selectedModules: Module[],
+  exemptedModules: Module[],
   semesterId: string,
   startIndex: number,
   endIndex: number
-): Module[] => {
+): { selectedModules: Module[]; exemptedModules: Module[] } => {
+  if (semesterId === "exemptions") {
+    const newExemptedModules = [...exemptedModules];
+    const [removed] = newExemptedModules.splice(startIndex, 1);
+    newExemptedModules.splice(endIndex, 0, removed);
+
+    return { selectedModules, exemptedModules: newExemptedModules };
+  }
+
   const intermediate: IntermediateReorderModules = {
     activeSemester: [],
     otherSemesters: [],
   };
-  const { activeSemester, otherSemesters } = modules.reduce((acc, module) => {
-    if (`${module.year}-${module.semester}` === semesterId) {
-      acc.activeSemester.push(module);
-    } else {
-      acc.otherSemesters.push(module);
-    }
+  const { activeSemester, otherSemesters } = selectedModules.reduce(
+    (acc, module) => {
+      if (`${module.year}-${module.semester}` === semesterId) {
+        acc.activeSemester.push(module);
+      } else {
+        acc.otherSemesters.push(module);
+      }
 
-    return acc;
-  }, intermediate);
+      return acc;
+    },
+    intermediate
+  );
 
   const [removed] = activeSemester.splice(startIndex, 1);
   activeSemester.splice(endIndex, 0, removed);
 
-  return activeSemester.concat(otherSemesters);
+  return {
+    selectedModules: activeSemester.concat(otherSemesters),
+    exemptedModules,
+  };
 };
 
 type IntermediateMoveModules = {
@@ -106,19 +157,20 @@ type IntermediateMoveModules = {
 };
 
 /**
- * Moves a module from a given year/semester pair to another.
+ * Moves a module from a given semester to another.
  */
 export const move = (
-  modules: Module[],
+  selectedModules: Module[],
+  exemptedModules: Module[],
   droppableSource: DraggableLocation,
   droppableDestination: DraggableLocation
-): Module[] => {
-  const intermediate: IntermediateMoveModules = {
+): { selectedModules: Module[]; exemptedModules: Module[] } => {
+  let intermediate: IntermediateMoveModules = {
     source: [],
     destination: [],
     others: [],
   };
-  const { source, destination, others } = modules.reduce((acc, module) => {
+  intermediate = selectedModules.reduce((acc, module) => {
     const semesterId = `${module.year}-${module.semester}`;
     if (semesterId === droppableSource.droppableId) {
       acc.source.push(module);
@@ -130,22 +182,83 @@ export const move = (
 
     return acc;
   }, intermediate);
+  let { source, destination } = intermediate;
+  const { others } = intermediate;
+
+  if (droppableSource.droppableId === "exemptions") {
+    source = [...exemptedModules];
+  }
 
   const [removed] = source.splice(droppableSource.index, 1);
-  // TODO: typescript is preventing the use of ! here
-  const match = /^(\d+)-(\d+)$/.exec(droppableDestination.droppableId);
-  if (!match) {
-    throw new Error(`Invalid ID: ${droppableDestination.droppableId}`);
+  let newModule = removed;
+  // If we're dropping on exemptions, we don't have to set a new semester.
+  if (droppableDestination.droppableId === "exemptions") {
+    destination = [...exemptedModules];
+  } else {
+    const match = /^(\d+)-(\d+)$/.exec(droppableDestination.droppableId);
+    if (!match) {
+      throw new Error(`Invalid ID: ${droppableDestination.droppableId}`);
+    }
+    const [, newYear, newSemester] = match;
+    newModule = {
+      ...removed,
+      year: Number(newYear),
+      semester: Number(newSemester),
+    };
   }
-  const [, newYear, newSemester] = match;
-  const newModule = {
-    ...removed,
-    year: Number(newYear),
-    semester: Number(newSemester),
-  };
   destination.splice(droppableDestination.index, 0, newModule);
 
-  return source.concat(destination).concat(others);
+  let newSelectedModules, newExemptedModules;
+  if (droppableSource.droppableId === "exemptions") {
+    newSelectedModules = [...destination, ...others];
+    newExemptedModules = source;
+  } else if (droppableDestination.droppableId === "exemptions") {
+    newSelectedModules = [...source, ...others];
+    newExemptedModules = destination;
+  } else {
+    newSelectedModules = [...source, ...destination, ...others];
+    newExemptedModules = exemptedModules;
+  }
+
+  return {
+    selectedModules: newSelectedModules,
+    exemptedModules: newExemptedModules,
+  };
+};
+
+/**
+ * Removes a module from the user's selection.
+ */
+export const remove = (
+  selectedModules: Module[],
+  exemptedModules: Module[],
+  semesterId: string,
+  index: number
+): { selectedModules: Module[]; exemptedModules: Module[] } => {
+  if (semesterId === "exemptions") {
+    const newExemptedModules = [...exemptedModules];
+    newExemptedModules.splice(index, 1);
+
+    return { selectedModules, exemptedModules: newExemptedModules };
+  }
+
+  const [source, others] = selectedModules.reduce(
+    ([source, others], module) => {
+      const currModuleSemesterId = `${module.year}-${module.semester}`;
+      if (currModuleSemesterId === semesterId) {
+        source.push(module);
+      } else {
+        others.push(module);
+      }
+
+      return [source, others];
+    },
+    [[], []] as [Module[], Module[]]
+  );
+
+  source.splice(index, 1);
+
+  return { selectedModules: [...source, ...others], exemptedModules };
 };
 
 /**

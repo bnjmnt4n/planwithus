@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQueries, useQuery } from "react-query";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { Grid, makeStyles } from "@material-ui/core";
+import { Grid, makeStyles, Typography } from "@material-ui/core";
 
 import { ModuleContextProvider } from "./ModuleContext";
 import Year from "./Year";
-import { getInitialModules, move, reorder } from "./utils/modules";
+import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
+import { move, remove, reorder } from "./utils/modules";
 import { checks } from "./utils/checks";
 
 import type { DropResult } from "react-beautiful-dnd";
-import type { Module, ModuleCondensed } from "./types";
+import type { ModuleCondensed } from "./types";
+import { ModuleList } from "./ModuleList";
+import { AddModule } from "./AddModule";
 
 const YEARS = [1, 2, 3, 4];
 
@@ -23,8 +26,16 @@ const useStyles = makeStyles((theme) => ({
 export const Main = (): JSX.Element => {
   const classes = useStyles();
 
+  // User-customizable data.
+  const {
+    selectedModules,
+    exemptedModules,
+    setSelectedModules,
+    setExemptedModules,
+  } = useUserSelectedModules();
   const [blockId, setBlockId] = useState("ulr-2015");
 
+  // Fetch list of all modules.
   const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
     ["modules"],
     async () => {
@@ -34,9 +45,6 @@ export const Main = (): JSX.Element => {
       return request.json();
     }
   );
-
-  const [selectedModules, setSelectedModules] =
-    useState<Module[]>(getInitialModules);
 
   // Fetch detailed information about each individual module, including prerequisite tree.
   const individualModuleInformation = useQueries(
@@ -51,14 +59,15 @@ export const Main = (): JSX.Element => {
     }))
   );
 
-  // Persist modules to `localStorage`.
-  useEffect(() => {
-    localStorage.setItem("modules", JSON.stringify(selectedModules));
-  }, [selectedModules]);
-
   const { hasAllData, transformedData, modules, results } = useMemo(
-    () => checks(selectedModules, individualModuleInformation, blockId),
-    [selectedModules, individualModuleInformation, blockId]
+    () =>
+      checks(
+        selectedModules,
+        exemptedModules,
+        individualModuleInformation,
+        blockId
+      ),
+    [selectedModules, exemptedModules, individualModuleInformation, blockId]
   );
 
   // Used to display drop to remove indicator.
@@ -78,24 +87,41 @@ export const Main = (): JSX.Element => {
     const sourceId = source.droppableId;
     const destinationId = destination.droppableId;
 
+    // Remove module from selection.
     if (destinationId === "remove") {
-      const newState = [...selectedModules];
-      newState.splice(source.index, 1);
+      const {
+        selectedModules: newSelectedModules,
+        exemptedModules: newExemptedModules,
+      } = remove(selectedModules, exemptedModules, sourceId, source.index);
 
-      setSelectedModules(newState);
-    } else if (sourceId === destinationId) {
-      const newState = reorder(
+      setSelectedModules(newSelectedModules);
+      setExemptedModules(newExemptedModules);
+    }
+    // Reorder module within the same semester grouping.
+    else if (sourceId === destinationId) {
+      const {
+        selectedModules: newSelectedModules,
+        exemptedModules: newExemptedModules,
+      } = reorder(
         selectedModules,
+        exemptedModules,
         sourceId,
         source.index,
         destination.index
       );
 
-      setSelectedModules(newState);
-    } else {
-      const newState = move(selectedModules, source, destination);
+      setSelectedModules(newSelectedModules);
+      setExemptedModules(newExemptedModules);
+    }
+    // Move module from one grouping to another.
+    else {
+      const {
+        selectedModules: newSelectedModules,
+        exemptedModules: newExemptedModules,
+      } = move(selectedModules, exemptedModules, source, destination);
 
-      setSelectedModules(newState);
+      setSelectedModules(newSelectedModules);
+      setExemptedModules(newExemptedModules);
     }
   };
 
@@ -116,7 +142,16 @@ export const Main = (): JSX.Element => {
   }
 
   return (
-    <ModuleContextProvider value={{ modules, moduleInfo, setSelectedModules }}>
+    <ModuleContextProvider
+      value={{
+        modules,
+        moduleInfo,
+        selectedModules,
+        exemptedModules,
+        setSelectedModules,
+        setExemptedModules,
+      }}
+    >
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <div className="h-screen flex flex-col">
           <Droppable droppableId="remove">
@@ -153,6 +188,12 @@ export const Main = (): JSX.Element => {
                 />
               </div>
             )}
+
+            <Grid item>
+              <Typography variant="h6">Exempted Modules</Typography>
+              <ModuleList droppableId="exemptions" modules={exemptedModules} />
+              <AddModule year={0} semester={0} isExemption />
+            </Grid>
 
             {YEARS.map((year, index) => (
               <Year key={year} year={year} data={transformedData[index]} />

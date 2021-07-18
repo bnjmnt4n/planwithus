@@ -12,6 +12,8 @@ type ModuleContextValue = {
   moduleInfo: ModuleCondensed[];
   addModule: (module: Module) => void;
   removeModule: (module: Module) => void;
+  addExemptedModule: (module: Module) => void;
+  removeExemptedModule: (module: Module) => void;
 };
 
 const ModuleContext = createContext<ModuleContextValue>(
@@ -22,7 +24,10 @@ type ModuleContextProviderProps = {
   children: React.ReactNode;
   value: {
     modules: Module[];
+    selectedModules: Module[];
+    exemptedModules: Module[];
     setSelectedModules: (value: React.SetStateAction<Module[]>) => void;
+    setExemptedModules: (value: React.SetStateAction<Module[]>) => void;
     moduleInfo: ModuleContextValue["moduleInfo"];
   };
 };
@@ -35,13 +40,22 @@ export const ModuleContextProvider = ({
   value,
   children,
 }: ModuleContextProviderProps): JSX.Element => {
-  const { modules, moduleInfo, setSelectedModules } = value;
+  const {
+    modules,
+    moduleInfo,
+    selectedModules,
+    exemptedModules,
+    setSelectedModules,
+    setExemptedModules,
+  } = value;
 
   const addModule = useCallback(
     (module: Module) => {
-      setSelectedModules((modules) => addModuleUtil(modules, module));
+      setSelectedModules((modules) =>
+        addModuleUtil(modules, exemptedModules, module)
+      );
     },
-    [setSelectedModules]
+    [exemptedModules, setSelectedModules]
   );
 
   const removeModule = useCallback(
@@ -51,14 +65,44 @@ export const ModuleContextProvider = ({
     [setSelectedModules]
   );
 
+  const addExemptedModule = useCallback(
+    (module: Module) => {
+      setExemptedModules((modules) =>
+        addModuleUtil(modules, selectedModules, module)
+      );
+    },
+    [selectedModules, setExemptedModules]
+  );
+
+  const removeExemptedModule = useCallback(
+    (toRemove: Module) => {
+      setExemptedModules((modules) =>
+        modules.filter(
+          (module) =>
+            !(module.code === toRemove.code && module.index === toRemove.index)
+        )
+      );
+    },
+    [setExemptedModules]
+  );
+
   const moduleData = useMemo(
     () => ({
       modules,
       moduleInfo,
       addModule,
       removeModule,
+      addExemptedModule,
+      removeExemptedModule,
     }),
-    [modules, moduleInfo, addModule, removeModule]
+    [
+      modules,
+      moduleInfo,
+      addModule,
+      removeModule,
+      addExemptedModule,
+      removeExemptedModule,
+    ]
   );
 
   return (

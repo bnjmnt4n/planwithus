@@ -18,17 +18,22 @@ import type { ModuleCondensed } from "./types";
 type AddModuleProps = {
   year: number;
   semester: number;
+  isExemption?: boolean;
 };
 
-export const AddModule = ({ year, semester }: AddModuleProps): JSX.Element => {
-  const { moduleInfo, addModule } = useModuleContext();
+export const AddModule = ({
+  year,
+  semester,
+  isExemption,
+}: AddModuleProps): JSX.Element => {
+  const { moduleInfo, addModule, addExemptedModule } = useModuleContext();
 
   return (
     <div>
       <Combobox
         items={moduleInfo}
         onItemSelected={(module) =>
-          addModule({
+          (isExemption ? addExemptedModule : addModule)({
             year,
             semester,
             code: module.moduleCode,

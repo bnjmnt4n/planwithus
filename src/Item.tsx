@@ -12,10 +12,16 @@ import type { Module } from "./types";
 type ItemProps = {
   item: Module;
   index: number;
+  displayWarnings: boolean;
   onRemove: () => void;
 };
 
-const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
+const Item = ({
+  item,
+  index,
+  displayWarnings,
+  onRemove,
+}: ItemProps): JSX.Element => {
   const classes = useItemStyles();
   const { modules, moduleInfo } = useModuleContext();
 
@@ -50,14 +56,18 @@ const Item = ({ item, index, onRemove }: ItemProps): JSX.Element => {
               <DeleteIcon />
             </IconButton>
           </div>
-          {!individualModuleInfo && <p>Loading module information...</p>}
-          {duplicate && <p>Duplicate module</p>}
-          {missingPrerequisites && (
-            <p>
-              Missing prerequisites:
-              <br />
-              {printMissingPrerequisites(missingPrerequisites)}
-            </p>
+          {displayWarnings && (
+            <>
+              {!individualModuleInfo && <p>Loading module information...</p>}
+              {duplicate && <p>Duplicate module</p>}
+              {missingPrerequisites && (
+                <p>
+                  Missing prerequisites:
+                  <br />
+                  {printMissingPrerequisites(missingPrerequisites)}
+                </p>
+              )}
+            </>
           )}
         </Paper>
       )}

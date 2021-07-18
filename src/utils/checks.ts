@@ -25,7 +25,8 @@ export const cleanQueries = (
 };
 
 export const checks = (
-  modules: Module[],
+  selectedModules: Module[],
+  exemptedModules: Module[],
   queries: unknown[],
   blockId: string
 ): {
@@ -38,9 +39,13 @@ export const checks = (
 } => {
   const { hasAllData, data } = cleanQueries(queries);
 
-  const checkedDupModules = checkDuplicates(modules);
+  const checkedDupModules = checkDuplicates(selectedModules);
   const transformedModules = transform(checkedDupModules);
-  const checkedPrereqModules = checkPrerequisites(transformedModules, data);
+  const checkedPrereqModules = checkPrerequisites(
+    transformedModules,
+    exemptedModules,
+    data
+  );
 
   const results = verifyPlan(
     checkedPrereqModules

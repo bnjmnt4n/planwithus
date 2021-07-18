@@ -27,7 +27,7 @@ export const ModuleList = ({
   droppableId,
   modules,
 }: ModuleListProps): JSX.Element => {
-  const { removeModule } = useModuleContext();
+  const { removeModule, removeExemptedModule } = useModuleContext();
   const classes = useListStyles();
 
   return (
@@ -47,7 +47,12 @@ export const ModuleList = ({
               item={item}
               index={index}
               key={getModuleId(item)}
-              onRemove={() => removeModule(item)}
+              displayWarnings={droppableId !== "exemptions"}
+              onRemove={() =>
+                droppableId === "exemptions"
+                  ? removeExemptedModule(item)
+                  : removeModule(item)
+              }
             />
           ))}
           {provided.placeholder}
