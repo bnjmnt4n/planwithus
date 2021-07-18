@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueries, useQuery } from "react-query";
-import { DragDropContext } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { Grid, makeStyles } from "@material-ui/core";
 
-import { checks, move, reorder } from "./utils";
 import { ModuleContextProvider } from "./ModuleContext";
 import Year from "./Year";
+import { getInitialModules, move, reorder } from "./utils/modules";
+import { checks } from "./utils/checks";
 
-import type { Module, ModuleCondensed } from "./types";
 import type { DropResult } from "react-beautiful-dnd";
+import type { Module, ModuleCondensed } from "./types";
 
 const YEARS = [1, 2, 3, 4];
 
@@ -60,7 +61,15 @@ export const Main = (): JSX.Element => {
     [selectedModules, individualModuleInformation, blockId]
   );
 
+  // Used to display drop to remove indicator.
+  const [isDragging, setIsDragging] = useState(false);
+  const onDragStart = () => {
+    setIsDragging(true);
+  };
+
   const onDragEnd = ({ source, destination }: DropResult): void => {
+    setIsDragging(false);
+
     // Don't allow drops outside the list.
     if (!destination) {
       return;
@@ -69,7 +78,12 @@ export const Main = (): JSX.Element => {
     const sourceId = source.droppableId;
     const destinationId = destination.droppableId;
 
-    if (sourceId === destinationId) {
+    if (destinationId === "remove") {
+      const newState = [...selectedModules];
+      newState.splice(source.index, 1);
+
+      setSelectedModules(newState);
+    } else if (sourceId === destinationId) {
       const newState = reorder(
         selectedModules,
         sourceId,
@@ -103,11 +117,20 @@ export const Main = (): JSX.Element => {
 
   return (
     <ModuleContextProvider value={{ modules, moduleInfo, setSelectedModules }}>
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <div className="h-screen flex flex-col">
-          <header className="w-full p-4 text-2xl text-center font-bold">
-            <h1>plaNwithUS</h1>
-          </header>
+          <Droppable droppableId="remove">
+            {/* TODO: highlighting when dragging over */}
+            {(provided, _snapshot) => (
+              <header
+                ref={provided.innerRef}
+                className="w-full p-4 text-2xl text-center font-bold"
+                {...provided.droppableProps}
+              >
+                <h1>{isDragging ? "Drop to remove" : "plaNwithUS"}</h1>
+              </header>
+            )}
+          </Droppable>
           <Grid
             container
             direction="row"
