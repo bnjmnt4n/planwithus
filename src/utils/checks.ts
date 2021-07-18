@@ -1,6 +1,7 @@
 import { verifyPlan, initDirectories } from "planwithus-lib";
 import { transform } from "./modules";
 import { checkPrerequisites } from "./prerequisites";
+import { checkPlan } from "./plan";
 
 import type { SatisfierResult } from "planwithus-lib";
 import type { Module } from "../types";
@@ -34,8 +35,7 @@ export const checks = (
   modules: Module[];
   transformedData: Module[][][];
   results: SatisfierResult;
-  // TODO: better typings
-  checkedResults: ReturnType<typeof checkPlan>;
+  info: string[];
 } => {
   const { hasAllData, data } = cleanQueries(queries);
 
@@ -47,7 +47,7 @@ export const checks = (
     data
   );
 
-  const results = verifyPlan(
+  const checkedPlan = verifyPlan(
     checkedPrereqModules
       .filter((module) => !module.duplicate)
       .map((module) => [
@@ -59,20 +59,15 @@ export const checks = (
     blockId
   );
 
-  const checkedResults = checkPlan(checkedPrereqModules, results);
+  const { results, info } = checkPlan(checkedPrereqModules, checkedPlan);
 
   return {
     hasAllData,
-    modules: checkedPrereqModules,
+    modules: results,
     transformedData: transformedModules,
-    results,
-    checkedResults,
+    results: checkedPlan,
+    info,
   };
-};
-
-// TODO: perform checks!
-const checkPlan = (modules: Module[], results: SatisfierResult): Module[] => {
-  return modules;
 };
 
 const checkDuplicates = (modules: Module[]): Module[] => {

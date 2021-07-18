@@ -8,6 +8,7 @@ export type Module = {
   index: number;
   missingPrerequisites?: PrerequisiteTree[] | null;
   duplicate?: boolean;
+  assignedBlock?: string;
   // TODO: get the types for this
   moduleInfo: unknown | null;
 };

@@ -33,6 +33,7 @@ const Item = ({
   const missingPrerequisites = module?.missingPrerequisites;
   const individualModuleInfo = module?.moduleInfo;
   const duplicate = module?.duplicate;
+  const assignedBlock = module?.assignedBlock;
 
   return (
     <Draggable draggableId={getModuleId(item)} index={index}>
@@ -60,6 +61,7 @@ const Item = ({
             <>
               {!individualModuleInfo && <p>Loading module information...</p>}
               {duplicate && <p>Duplicate module</p>}
+              {assignedBlock && <p>Assigned to block: {assignedBlock}</p>}
               {missingPrerequisites && (
                 <p>
                   Missing prerequisites:

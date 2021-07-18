@@ -59,7 +59,7 @@ export const Main = (): JSX.Element => {
     }))
   );
 
-  const { hasAllData, transformedData, modules, results } = useMemo(
+  const { hasAllData, transformedData, modules, results, info } = useMemo(
     () =>
       checks(
         selectedModules,
@@ -193,6 +193,7 @@ export const Main = (): JSX.Element => {
               <Typography variant="h6">Exempted Modules</Typography>
               <ModuleList droppableId="exemptions" modules={exemptedModules} />
               <AddModule year={0} semester={0} isExemption />
+              <p>{info.join("\n")}</p>
             </Grid>
 
             {YEARS.map((year, index) => (
