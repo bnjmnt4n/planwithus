@@ -12,23 +12,6 @@ import type { DropResult } from "react-beautiful-dnd";
 
 const YEARS = [1, 2, 3, 4];
 
-const getInitialModules = (): Module[] => {
-  let modules: Module[];
-  try {
-    modules = JSON.parse(localStorage.getItem("modules") ?? "[]");
-  } catch (e) {
-    modules = [
-      { year: 1, semester: 1, code: "GER1000", index: 0, moduleInfo: null },
-      { year: 1, semester: 1, code: "CS1101S", index: 0, moduleInfo: null },
-    ];
-  }
-  if (!modules.length) {
-    modules = [];
-  }
-
-  return modules;
-};
-
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,

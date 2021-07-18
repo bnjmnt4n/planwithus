@@ -1,11 +1,13 @@
 import { Draggable } from "react-beautiful-dnd";
 import { IconButton, Paper } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
+
 import { useItemStyles } from "./listStyles";
 import { useModuleContext } from "./ModuleContext";
+import { getModuleId } from "./utils/modules";
+import { printMissingPrerequisites } from "./utils/prerequisites";
 
 import type { Module } from "./types";
-import { getModuleId, printMissingPrerequisites } from "./utils";
 
 type ItemProps = {
   item: Module;

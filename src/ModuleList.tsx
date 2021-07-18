@@ -3,7 +3,7 @@ import { Droppable } from "react-beautiful-dnd";
 
 import Item from "./Item";
 import { useModuleContext } from "./ModuleContext";
-import { getModuleId } from "./utils";
+import { getModuleId } from "./utils/modules";
 
 import type { Module } from "./types";
 

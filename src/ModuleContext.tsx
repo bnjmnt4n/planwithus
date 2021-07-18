@@ -1,8 +1,9 @@
 import React, { createContext, useCallback, useContext, useMemo } from "react";
+
 import {
   addModule as addModuleUtil,
   removeModule as removeModuleUtil,
-} from "./utils";
+} from "./utils/modules";
 
 import type { Module, ModuleCondensed } from "./types";
 

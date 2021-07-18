@@ -1,4 +1,4 @@
-import { PrerequisiteTree } from "./utils";
+import type { PrerequisiteTree } from "./utils/prerequisites";
 
 export type Module = {
   year: number;
