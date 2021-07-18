@@ -16,7 +16,6 @@ const getInitialModules = (): Module[] => {
   let modules: Module[];
   try {
     modules = JSON.parse(localStorage.getItem("modules") ?? "[]");
-    // eslint-disable-next-line no-empty
   } catch (e) {
     modules = [
       { year: 1, semester: 1, code: "GER1000", index: 0, moduleInfo: null },
@@ -39,6 +38,8 @@ const useStyles = makeStyles((theme) => ({
 
 export const Main = (): JSX.Element => {
   const classes = useStyles();
+
+  const [blockId, setBlockId] = useState("ulr-2015");
 
   const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
     ["modules"],
@@ -71,9 +72,9 @@ export const Main = (): JSX.Element => {
     localStorage.setItem("modules", JSON.stringify(selectedModules));
   }, [selectedModules]);
 
-  const { hasAllData, transformedData, modules } = useMemo(
-    () => checks(selectedModules, individualModuleInformation),
-    [selectedModules, individualModuleInformation]
+  const { hasAllData, transformedData, modules, results } = useMemo(
+    () => checks(selectedModules, individualModuleInformation, blockId),
+    [selectedModules, individualModuleInformation, blockId]
   );
 
   const onDragEnd = ({ source, destination }: DropResult): void => {
@@ -131,6 +132,22 @@ export const Main = (): JSX.Element => {
             className={classes.root}
             spacing={3}
           >
+            {/* TODO: better styling*/}
+            {process.env.NODE_ENV === "development" && (
+              <div style={{ flex: "1 0 50%" }}>
+                <input
+                  value={blockId}
+                  onChange={(e) => setBlockId(e.target.value)}
+                />
+                <p>{results.isSatisfied ? "satisfied" : results.message}</p>
+                <textarea
+                  className="w-full h-full"
+                  style={{ fontFamily: "Iosevka, monospace" }}
+                  value={JSON.stringify(results, null, 2)}
+                />
+              </div>
+            )}
+
             {YEARS.map((year, index) => (
               <Year key={year} year={year} data={transformedData[index]} />
             ))}

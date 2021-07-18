@@ -1,5 +1,6 @@
 import { DraggableLocation } from "react-beautiful-dnd";
 import type { Module } from "./types";
+import { verifyPlan, initDirectories, SatisfierResult } from "planwithus-lib";
 
 /**
  * Transforms a flat array of modules into a 3-dimensional array of modules.
@@ -160,11 +161,15 @@ export const cleanQueries = (
 
 export const checks = (
   modules: Module[],
-  queries: unknown[]
+  queries: unknown[],
+  blockId: string
 ): {
   hasAllData: boolean;
   modules: Module[];
   transformedData: Module[][][];
+  results: SatisfierResult;
+  // TODO: better typings
+  checkedResults: ReturnType<typeof checkPlan>;
 } => {
   const { hasAllData, data } = cleanQueries(queries);
 
@@ -172,14 +177,33 @@ export const checks = (
   const transformedModules = transform(checkedDupModules);
   const checkedPrereqModules = checkPrerequisites(transformedModules, data);
 
+  const results = verifyPlan(
+    checkedPrereqModules
+      .filter((module) => !module.duplicate)
+      .map((module) => [
+        module.code,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        Number((module.moduleInfo as any)?.moduleCredit) ?? 4,
+      ]),
+    initDirectories().primary,
+    blockId
+  );
+
+  const checkedResults = checkPlan(checkedPrereqModules, results);
+
   return {
     hasAllData,
     modules: checkedPrereqModules,
     transformedData: transformedModules,
+    results,
+    checkedResults,
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const checkPlan = (modules: Module[], results: SatisfierResult): Module[] => {
+  return modules;
+};
+
 const checkDuplicates = (modules: Module[]): Module[] => {
   const seenModulesSet = new Set<string>();
   return modules.map((module) => {
