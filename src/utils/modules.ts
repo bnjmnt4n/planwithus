@@ -59,7 +59,8 @@ export const removeModule = (modules: Module[], toRemove: Module): Module[] => {
       !(
         module.code === toRemove.code &&
         module.semester === toRemove.semester &&
-        module.year === toRemove.year
+        module.year === toRemove.year &&
+        module.index === toRemove.index
       )
   );
 };
