@@ -1,5 +1,27 @@
-import { SatisfierResult } from "planwithus-lib";
+import { initDirectories } from "planwithus-lib";
 import { Module } from "../types";
+
+import type { SatisfierResult } from "planwithus-lib";
+
+const DIRECTORIES = initDirectories();
+
+export const getTopLevelBlocks = (): (readonly [string, string])[] => {
+  return Object.entries(DIRECTORIES).flatMap(([name, blocks]) => {
+    return blocks.retrieveTopLevel().map((blockId) => [name, blockId] as const);
+  });
+};
+
+export const getTopLevelBlockName = ([directory, blockId]: readonly [
+  string,
+  string
+]): string => {
+  const [, block] = DIRECTORIES[directory as keyof typeof DIRECTORIES].find(
+    "",
+    blockId
+  );
+
+  return block.name ?? "";
+};
 
 export const checkPlan = (
   modules: Module[],

@@ -4,12 +4,14 @@ import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { Grid, makeStyles, Typography } from "@material-ui/core";
 
 import { ModuleContextProvider } from "./ModuleContext";
+import { Combobox } from "./Combobox";
 import Year from "./Year";
 import { ModuleList } from "./ModuleList";
 import { AddModule } from "./AddModule";
 import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
 import { move, remove, reorder } from "./utils/modules";
 import { checks } from "./utils/checks";
+import { getTopLevelBlockName, getTopLevelBlocks } from "./utils/plan";
 
 import type { DropResult } from "react-beautiful-dnd";
 import type { ModuleCondensed } from "./types";
@@ -33,7 +35,9 @@ export const Main = (): JSX.Element => {
     setSelectedModules,
     setExemptedModules,
   } = useUserSelectedModules();
-  const [blockId, setBlockId] = useState("ulr-2015");
+  const topLevelBlocks = getTopLevelBlocks();
+  const [block, setBlock] = useState(topLevelBlocks[0]);
+  const blockId = block[1];
 
   // Fetch list of all modules.
   const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
@@ -174,9 +178,15 @@ export const Main = (): JSX.Element => {
             spacing={3}
           >
             <div style={{ flex: "1 0 20%", padding: 20 }}>
-              <input
-                value={blockId}
-                onChange={(e) => setBlockId(e.target.value)}
+              <p>Selected block: {getTopLevelBlockName(block)}</p>
+              <Combobox
+                items={topLevelBlocks}
+                label="Select a block"
+                placeholder="Block"
+                emptyText="No such block"
+                itemKey={(block, index) => `${block[0]}-${block[1]}-${index}`}
+                itemToString={(block) => getTopLevelBlockName(block)}
+                onItemSelected={(block) => setBlock(block)}
               />
               <p>{results.isSatisfied ? "satisfied" : results.message}</p>
               <p>{info.join("\n")}</p>
