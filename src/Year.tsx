@@ -1,31 +1,27 @@
 import { Grid, Typography } from "@material-ui/core";
-import Semester from "./Semester";
-
-import type { Module } from "./types";
+import { Semester } from "./Semester";
 
 type YearProps = {
   year: number;
-  data: Module[][];
+  moduleIndices: number[][][];
 };
 
 const SEMESTERS = [1, 2];
 
-const Year = ({ year, data }: YearProps): JSX.Element => {
+export const Year = ({ year, moduleIndices }: YearProps): JSX.Element => {
   return (
     <Grid item>
       <Typography variant="h5">Year {year}</Typography>
       <Grid container direction="row" wrap="nowrap" spacing={2}>
-        {SEMESTERS.map((semester, index) => (
+        {SEMESTERS.map((semester) => (
           <Semester
             key={semester}
             year={year}
             semester={semester}
-            modules={data[index]}
+            moduleIndices={moduleIndices}
           />
         ))}
       </Grid>
     </Grid>
   );
 };
-
-export default Year;

@@ -27,8 +27,13 @@ export const checkPlan = (
   modules: Module[],
   [directory, blockId]: readonly [string, string]
 ): { results: Module[]; info: string[]; checkedPlan: SatisfierResult } => {
+  const seenModulesSet = new Set<string>();
   modules = modules
-    .filter((module) => !module.duplicate)
+    .filter((module) => {
+      const seen = seenModulesSet.has(module.code);
+      seenModulesSet.add(module.code);
+      return !seen;
+    })
     .map((module) => ({ ...module }));
 
   const checkedPlan = verifyPlan(

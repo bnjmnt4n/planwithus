@@ -5,11 +5,11 @@ import { Grid, makeStyles, Typography } from "@material-ui/core";
 
 import { ModuleContextProvider } from "./ModuleContext";
 import { Combobox } from "./Combobox";
-import Year from "./Year";
+import { Year } from "./Year";
 import { ModuleList } from "./ModuleList";
 import { AddModule } from "./AddModule";
 import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
-import { move, remove, reorder } from "./utils/modules";
+import { move, removeModule, swapPosition } from "./utils/modules";
 import { checks } from "./utils/checks";
 import { getTopLevelBlockName, getTopLevelBlocks } from "./utils/plan";
 
@@ -29,17 +29,12 @@ export const Main = (): JSX.Element => {
   const classes = useStyles();
 
   // User-customizable data.
-  const {
-    selectedModules,
-    exemptedModules,
-    setSelectedModules,
-    setExemptedModules,
-  } = useUserSelectedModules();
+  const { selectedModules, setSelectedModules } = useUserSelectedModules();
   const topLevelBlocks = getTopLevelBlocks();
   const [block, setBlock] = useState(topLevelBlocks[0]);
 
   // Fetch list of all modules.
-  const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
+  const { data: allModulesInformation, status } = useQuery<ModuleCondensed[]>(
     ["modules"],
     async () => {
       const request = await fetch(
@@ -51,7 +46,7 @@ export const Main = (): JSX.Element => {
 
   // Fetch detailed information about each individual module, including prerequisite tree.
   const individualModuleInformation = useQueries(
-    selectedModules.map((module) => ({
+    selectedModules.modules.map((module) => ({
       queryKey: ["module", module.code],
       queryFn: async () => {
         const request = await fetch(
@@ -62,16 +57,11 @@ export const Main = (): JSX.Element => {
     }))
   ) as UseQueryResult<ModuleInformation>[];
 
-  const { hasAllData, transformedData, modules, results, info } = useMemo(
-    () =>
-      checks(
-        selectedModules,
-        exemptedModules,
-        individualModuleInformation,
-        block
-      ),
-    [selectedModules, exemptedModules, individualModuleInformation, block]
-  );
+  const { hasAllData, moduleIndices, modules, checkedResults, results, info } =
+    useMemo(
+      () => checks(selectedModules.modules, individualModuleInformation, block),
+      [selectedModules, individualModuleInformation, block]
+    );
 
   // Used to display drop to remove indicator.
   const [isDragging, setIsDragging] = useState(false);
@@ -92,39 +82,17 @@ export const Main = (): JSX.Element => {
 
     // Remove module from selection.
     if (destinationId === "remove") {
-      const {
-        selectedModules: newSelectedModules,
-        exemptedModules: newExemptedModules,
-      } = remove(selectedModules, exemptedModules, sourceId, source.index);
-
-      setSelectedModules(newSelectedModules);
-      setExemptedModules(newExemptedModules);
+      setSelectedModules(removeModule(selectedModules, source.index));
     }
     // Reorder module within the same semester grouping.
     else if (sourceId === destinationId) {
-      const {
-        selectedModules: newSelectedModules,
-        exemptedModules: newExemptedModules,
-      } = reorder(
-        selectedModules,
-        exemptedModules,
-        sourceId,
-        source.index,
-        destination.index
+      setSelectedModules(
+        swapPosition(selectedModules, source.index, destination.index)
       );
-
-      setSelectedModules(newSelectedModules);
-      setExemptedModules(newExemptedModules);
     }
     // Move module from one grouping to another.
     else {
-      const {
-        selectedModules: newSelectedModules,
-        exemptedModules: newExemptedModules,
-      } = move(selectedModules, exemptedModules, source, destination);
-
-      setSelectedModules(newSelectedModules);
-      setExemptedModules(newExemptedModules);
+      setSelectedModules(move(selectedModules, source.index, destination));
     }
   };
 
@@ -140,7 +108,7 @@ export const Main = (): JSX.Element => {
     );
   }
 
-  if (!moduleInfo) {
+  if (!allModulesInformation) {
     throw new Error("No module information found");
   }
 
@@ -148,11 +116,10 @@ export const Main = (): JSX.Element => {
     <ModuleContextProvider
       value={{
         modules,
-        moduleInfo,
+        checkedResults,
+        allModulesInformation,
         selectedModules,
-        exemptedModules,
         setSelectedModules,
-        setExemptedModules,
       }}
     >
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
@@ -166,6 +133,7 @@ export const Main = (): JSX.Element => {
                 {...provided.droppableProps}
               >
                 <h1>{isDragging ? "Drop to remove" : "plaNwithUS"}</h1>
+                {provided.placeholder}
               </header>
             )}
           </Droppable>
@@ -193,12 +161,12 @@ export const Main = (): JSX.Element => {
 
             <Grid item>
               <Typography variant="h6">Exempted Modules</Typography>
-              <ModuleList droppableId="exemptions" modules={exemptedModules} />
-              <AddModule year={0} semester={0} isExemption />
+              <ModuleList droppableId="0-0" modules={moduleIndices[0][0]} />
+              <AddModule year={0} semester={0} moduleIndices={moduleIndices} />
             </Grid>
 
-            {YEARS.map((year, index) => (
-              <Year key={year} year={year} data={transformedData[index]} />
+            {YEARS.map((year) => (
+              <Year key={year} year={year} moduleIndices={moduleIndices} />
             ))}
           </Grid>
           <div>

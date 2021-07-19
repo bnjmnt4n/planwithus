@@ -5,15 +5,14 @@ import {
   removeModule as removeModuleUtil,
 } from "./utils/modules";
 
-import type { Module, ModuleCondensed } from "./types";
+import type { Module, ModuleCondensed, ModuleList } from "./types";
 
 type ModuleContextValue = {
   modules: Module[];
-  moduleInfo: ModuleCondensed[];
-  addModule: (module: Module) => void;
-  removeModule: (module: Module) => void;
-  addExemptedModule: (module: Module) => void;
-  removeExemptedModule: (module: Module) => void;
+  allModulesInformation: ModuleCondensed[];
+  addModule: (module: Module, addBeforeIndex: number) => void;
+  removeModule: (toRemoveIndex: number) => void;
+  getModule: (index: number) => Module;
 };
 
 const ModuleContext = createContext<ModuleContextValue>(
@@ -24,11 +23,10 @@ type ModuleContextProviderProps = {
   children: React.ReactNode;
   value: {
     modules: Module[];
-    selectedModules: Module[];
-    exemptedModules: Module[];
-    setSelectedModules: (value: React.SetStateAction<Module[]>) => void;
-    setExemptedModules: (value: React.SetStateAction<Module[]>) => void;
-    moduleInfo: ModuleContextValue["moduleInfo"];
+    checkedResults: Module[];
+    selectedModules: ModuleList;
+    setSelectedModules: (value: React.SetStateAction<ModuleList>) => void;
+    allModulesInformation: ModuleContextValue["allModulesInformation"];
   };
 };
 
@@ -40,69 +38,51 @@ export const ModuleContextProvider = ({
   value,
   children,
 }: ModuleContextProviderProps): JSX.Element => {
-  const {
-    modules,
-    moduleInfo,
-    selectedModules,
-    exemptedModules,
-    setSelectedModules,
-    setExemptedModules,
-  } = value;
+  const { modules, checkedResults, setSelectedModules, allModulesInformation } =
+    value;
 
   const addModule = useCallback(
-    (module: Module) => {
+    (module: Module, addBeforeIndex: number) => {
       setSelectedModules((modules) =>
-        addModuleUtil(modules, exemptedModules, module)
+        addModuleUtil(modules, module, addBeforeIndex)
       );
-    },
-    [exemptedModules, setSelectedModules]
-  );
-
-  const removeModule = useCallback(
-    (toRemove: Module) => {
-      setSelectedModules((modules) => removeModuleUtil(modules, toRemove));
     },
     [setSelectedModules]
   );
 
-  const addExemptedModule = useCallback(
-    (module: Module) => {
-      setExemptedModules((modules) =>
-        addModuleUtil(modules, selectedModules, module)
-      );
+  const removeModule = useCallback(
+    (toRemoveIndex: number) => {
+      setSelectedModules((modules) => removeModuleUtil(modules, toRemoveIndex));
     },
-    [selectedModules, setExemptedModules]
+    [setSelectedModules]
   );
 
-  const removeExemptedModule = useCallback(
-    (toRemove: Module) => {
-      setExemptedModules((modules) =>
-        modules.filter(
-          (module) =>
-            !(module.code === toRemove.code && module.index === toRemove.index)
-        )
+  const getModule = useCallback(
+    (index: number) => {
+      const module = checkedResults.find(
+        (result) => result.code === modules[index].code
       );
+
+      if (!module) {
+        return modules[index];
+      }
+      return {
+        ...module,
+        uniqueId: modules[index].uniqueId,
+      };
     },
-    [setExemptedModules]
+    [checkedResults, modules]
   );
 
   const moduleData = useMemo(
     () => ({
       modules,
-      moduleInfo,
+      allModulesInformation,
       addModule,
       removeModule,
-      addExemptedModule,
-      removeExemptedModule,
+      getModule,
     }),
-    [
-      modules,
-      moduleInfo,
-      addModule,
-      removeModule,
-      addExemptedModule,
-      removeExemptedModule,
-    ]
+    [modules, allModulesInformation, addModule, removeModule, getModule]
   );
 
   return (

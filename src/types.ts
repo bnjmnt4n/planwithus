@@ -5,11 +5,22 @@ export type Module = {
   semester: number;
   code: string;
   /** Unique identifier to allow duplicate modules to be selected. */
-  index: number;
+  uniqueId: number;
+
+  // TODO: extra info
   missingPrerequisites?: PrerequisiteTree[] | null;
   duplicate?: boolean;
   assignedBlock?: string;
   moduleInfo?: ModuleInformation | null;
+};
+
+/**
+ * A "list" of modules.
+ */
+export type ModuleList = {
+  /** Monotonically increasing ID to prevent reuse of IDs even upon deletion. */
+  uniqueId: number;
+  modules: Module[];
 };
 
 // Copied from https://github.com/nusmodifications/nusmods/blob/0d8b187f2711c9af4d98c4a2b44ce3b1847ac1d1/scrapers/nus-v2/src/types/modules.ts

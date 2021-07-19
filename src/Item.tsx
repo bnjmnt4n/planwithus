@@ -7,27 +7,23 @@ import { useModuleContext } from "./ModuleContext";
 import { getModuleId } from "./utils/modules";
 import { printMissingPrerequisites } from "./utils/prerequisites";
 
-import type { Module } from "./types";
-
 type ItemProps = {
-  item: Module;
   index: number;
   displayWarnings: boolean;
   onRemove: () => void;
 };
 
-const Item = ({
-  item,
+export const Item = ({
   index,
   displayWarnings,
   onRemove,
 }: ItemProps): JSX.Element => {
   const classes = useItemStyles();
-  const { modules, moduleInfo } = useModuleContext();
+  const { getModule, allModulesInformation } = useModuleContext();
 
-  const itemInfo = moduleInfo.find((module) => module.moduleCode === item.code);
-  const module = modules.find(
-    (module) => module.code === item.code && module.index === item.index
+  const module = getModule(index);
+  const itemInfo = allModulesInformation.find(
+    (moduleInformation) => moduleInformation.moduleCode === module?.code
   );
 
   const missingPrerequisites = module?.missingPrerequisites;
@@ -36,7 +32,7 @@ const Item = ({
   const assignedBlock = module?.assignedBlock;
 
   return (
-    <Draggable draggableId={getModuleId(item)} index={index}>
+    <Draggable draggableId={getModuleId(module)} index={index}>
       {(provided, snapshot) => (
         <Paper
           ref={provided.innerRef}
@@ -51,7 +47,7 @@ const Item = ({
               justifyContent: "space-around",
             }}
           >
-            {item.code}
+            {module.code}
             {itemInfo && ` ${itemInfo.title}`}
             <IconButton aria-label="delete" onClick={onRemove}>
               <DeleteIcon />
@@ -76,5 +72,3 @@ const Item = ({
     </Draggable>
   );
 };
-
-export default Item;

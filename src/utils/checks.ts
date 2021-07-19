@@ -1,4 +1,4 @@
-import { transform } from "./modules";
+import { EXEMPTION_SEMESTER, EXEMPTION_YEAR, transform } from "./modules";
 import { checkPrerequisites } from "./prerequisites";
 import { checkPlan } from "./plan";
 
@@ -7,32 +7,45 @@ import type { SatisfierResult } from "planwithus-lib";
 import type { Module, ModuleInformation } from "../types";
 
 export const checks = (
-  selectedModules: Module[],
-  exemptedModules: Module[],
+  modules: Module[],
   queries: UseQueryResult<ModuleInformation>[],
   block: readonly [string, string]
 ): {
   hasAllData: boolean;
   modules: Module[];
-  transformedData: Module[][][];
+  checkedResults: Module[];
+  moduleIndices: number[][][];
   results: SatisfierResult;
   info: string[];
 } => {
   const { hasAllData, data } = cleanQueries(queries);
 
+  const exemptedModules = modules.filter(
+    (module) =>
+      module.year === EXEMPTION_YEAR && module.semester === EXEMPTION_SEMESTER
+  );
+  const selectedModules = modules.filter(
+    (module) =>
+      !(
+        module.year === EXEMPTION_YEAR && module.semester === EXEMPTION_SEMESTER
+      )
+  );
+
   const checkedDupModules = checkDuplicates(selectedModules);
-  const transformedModules = transform(checkedDupModules);
   const checkedPrereqModules = checkPrerequisites(
-    transformedModules,
+    checkedDupModules,
     exemptedModules,
     data
   );
   const { results, info, checkedPlan } = checkPlan(checkedPrereqModules, block);
 
+  const moduleIndices = transform(modules, (_module, index) => index);
+
   return {
     hasAllData,
-    modules: results,
-    transformedData: transformedModules,
+    modules,
+    checkedResults: results,
+    moduleIndices,
     results: checkedPlan,
     info,
   };

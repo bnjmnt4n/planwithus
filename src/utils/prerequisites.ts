@@ -1,11 +1,15 @@
+import { transform } from "./modules";
 import type { Module, ModuleInformation } from "../types";
 
 export const checkPrerequisites = (
-  modules: Module[][][],
+  modulesList: Module[],
   exemptedModules: Module[],
   data: ModuleInformation[]
 ): Module[] => {
+  const modules = transform(modulesList, (module) => module);
   const semesters = modules.flatMap((year) => year);
+
+  const seenModulesSet = new Set<string>();
 
   const checkedSemesters = semesters.map((currSemesterModules, index) => {
     const prevSemesterModules =
@@ -26,7 +30,9 @@ export const checkPrerequisites = (
         (moduleInfo) => moduleInfo.moduleCode === module.code
       );
       const prerequisiteTree = moduleInfo?.prereqTree;
-      const duplicate = module.duplicate;
+      const duplicate = seenModulesSet.has(module.code);
+
+      seenModulesSet.add(module.code);
 
       if (!duplicate && prerequisiteTree) {
         const missingPrerequisites = checkPrerequisiteTree(

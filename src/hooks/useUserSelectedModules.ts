@@ -1,32 +1,22 @@
 import { useEffect, useState } from "react";
+import { getSelectedModules, persistModules } from "../utils/modules";
 
-import type { Module } from "../types";
-import {
-  getExemptedModules,
-  getSelectedModules,
-  persistModules,
-} from "../utils/modules";
+import type { ModuleList } from "../types";
 
 export function useUserSelectedModules(): {
-  selectedModules: Module[];
-  exemptedModules: Module[];
-  setSelectedModules: (modules: React.SetStateAction<Module[]>) => void;
-  setExemptedModules: (modules: React.SetStateAction<Module[]>) => void;
+  selectedModules: ModuleList;
+  setSelectedModules: (modules: React.SetStateAction<ModuleList>) => void;
 } {
-  const [exemptedModules, setExemptedModules] =
-    useState<Module[]>(getExemptedModules);
   const [selectedModules, setSelectedModules] =
-    useState<Module[]>(getSelectedModules);
+    useState<ModuleList>(getSelectedModules);
 
   // Persist modules to `localStorage`.
   useEffect(() => {
-    persistModules(selectedModules, exemptedModules);
-  }, [selectedModules, exemptedModules]);
+    persistModules(selectedModules);
+  }, [selectedModules]);
 
   return {
     selectedModules,
-    exemptedModules,
     setSelectedModules,
-    setExemptedModules,
   };
 }

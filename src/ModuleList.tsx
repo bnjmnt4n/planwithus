@@ -1,11 +1,9 @@
 import { Grid, makeStyles } from "@material-ui/core";
 import { Droppable } from "react-beautiful-dnd";
 
-import Item from "./Item";
+import { Item } from "./Item";
 import { useModuleContext } from "./ModuleContext";
 import { getModuleId } from "./utils/modules";
-
-import type { Module } from "./types";
 
 const useListStyles = makeStyles(() => ({
   idle: {
@@ -20,14 +18,14 @@ const useListStyles = makeStyles(() => ({
 
 type ModuleListProps = {
   droppableId: string;
-  modules: Module[];
+  modules: number[];
 };
 
 export const ModuleList = ({
   droppableId,
   modules,
 }: ModuleListProps): JSX.Element => {
-  const { removeModule, removeExemptedModule } = useModuleContext();
+  const { getModule, removeModule } = useModuleContext();
   const classes = useListStyles();
 
   return (
@@ -42,17 +40,12 @@ export const ModuleList = ({
           }
           {...provided.droppableProps}
         >
-          {modules.map((item, index) => (
+          {modules.map((moduleIndex) => (
             <Item
-              item={item}
-              index={index}
-              key={getModuleId(item)}
-              displayWarnings={droppableId !== "exemptions"}
-              onRemove={() =>
-                droppableId === "exemptions"
-                  ? removeExemptedModule(item)
-                  : removeModule(item)
-              }
+              key={getModuleId(getModule(moduleIndex))}
+              index={moduleIndex}
+              displayWarnings={droppableId !== "0-0"}
+              onRemove={() => removeModule(moduleIndex)}
             />
           ))}
           {provided.placeholder}

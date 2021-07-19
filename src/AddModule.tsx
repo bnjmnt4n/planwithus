@@ -6,33 +6,35 @@ import type { ModuleCondensed } from "./types";
 type AddModuleProps = {
   year: number;
   semester: number;
-  isExemption?: boolean;
+  moduleIndices: number[][][];
 };
 
 export const AddModule = ({
   year,
   semester,
-  isExemption,
+  moduleIndices,
 }: AddModuleProps): JSX.Element => {
-  const { moduleInfo, addModule, addExemptedModule } = useModuleContext();
+  const { allModulesInformation, addModule } = useModuleContext();
 
   return (
     <div>
       <Combobox
-        items={moduleInfo}
+        items={allModulesInformation}
         label="Add modules:"
         placeholder="Module"
         emptyText="No modules found"
         itemKey={(item, index) => `${item.moduleCode}-${index}`}
         itemToString={moduleInfoToString}
         onItemSelected={(module) =>
-          (isExemption ? addExemptedModule : addModule)({
-            year,
-            semester,
-            code: module.moduleCode,
-            index: 0,
-            moduleInfo: null,
-          })
+          addModule(
+            {
+              year,
+              semester,
+              code: module.moduleCode,
+              uniqueId: 0,
+            },
+            getNextIndex(moduleIndices, year, semester)
+          )
         }
       />
     </div>
@@ -41,4 +43,26 @@ export const AddModule = ({
 
 const moduleInfoToString = ({ title, moduleCode }: ModuleCondensed): string => {
   return `${moduleCode} ${title}`;
+};
+
+const getNextIndex = (
+  moduleIndices: number[][][],
+  year: number,
+  semester: number
+): number => {
+  let moduleCount = 0;
+  let index = 0;
+  moduleIndices.forEach((yearArray, yearIndex) => {
+    yearArray.forEach((semesterArray, semesterIndex) => {
+      semesterArray.forEach((_module) => {
+        moduleCount++;
+      });
+
+      if (year === yearIndex && semester === semesterIndex) {
+        index = moduleCount;
+      }
+    });
+  });
+
+  return index;
 };
