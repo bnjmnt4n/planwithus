@@ -5,14 +5,14 @@ import { Grid, makeStyles, Typography } from "@material-ui/core";
 
 import { ModuleContextProvider } from "./ModuleContext";
 import Year from "./Year";
+import { ModuleList } from "./ModuleList";
+import { AddModule } from "./AddModule";
 import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
 import { move, remove, reorder } from "./utils/modules";
 import { checks } from "./utils/checks";
 
 import type { DropResult } from "react-beautiful-dnd";
 import type { ModuleCondensed } from "./types";
-import { ModuleList } from "./ModuleList";
-import { AddModule } from "./AddModule";
 
 const YEARS = [1, 2, 3, 4];
 
@@ -173,27 +173,19 @@ export const Main = (): JSX.Element => {
             className={classes.root}
             spacing={3}
           >
-            {/* TODO: better styling*/}
-            {process.env.NODE_ENV === "development" && (
-              <div style={{ flex: "1 0 50%" }}>
-                <input
-                  value={blockId}
-                  onChange={(e) => setBlockId(e.target.value)}
-                />
-                <p>{results.isSatisfied ? "satisfied" : results.message}</p>
-                <textarea
-                  className="w-full h-full"
-                  style={{ fontFamily: "Iosevka, monospace" }}
-                  value={JSON.stringify(results, null, 2)}
-                />
-              </div>
-            )}
+            <div style={{ flex: "1 0 20%", padding: 20 }}>
+              <input
+                value={blockId}
+                onChange={(e) => setBlockId(e.target.value)}
+              />
+              <p>{results.isSatisfied ? "satisfied" : results.message}</p>
+              <p>{info.join("\n")}</p>
+            </div>
 
             <Grid item>
               <Typography variant="h6">Exempted Modules</Typography>
               <ModuleList droppableId="exemptions" modules={exemptedModules} />
               <AddModule year={0} semester={0} isExemption />
-              <p>{info.join("\n")}</p>
             </Grid>
 
             {YEARS.map((year, index) => (
