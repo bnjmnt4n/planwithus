@@ -1,10 +1,9 @@
-import type { Module } from "../types";
+import type { Module, ModuleInformation } from "../types";
 
 export const checkPrerequisites = (
   modules: Module[][][],
   exemptedModules: Module[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[]
+  data: ModuleInformation[]
 ): Module[] => {
   const semesters = modules.flatMap((year) => year);
 
@@ -27,7 +26,7 @@ export const checkPrerequisites = (
         (moduleInfo) => moduleInfo.moduleCode === module.code
       );
       const prerequisiteTree = moduleInfo?.prereqTree;
-      const duplicate = moduleInfo?.duplicate;
+      const duplicate = module.duplicate;
 
       if (!duplicate && prerequisiteTree) {
         const missingPrerequisites = checkPrerequisiteTree(

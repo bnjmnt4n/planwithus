@@ -3,32 +3,14 @@ import { transform } from "./modules";
 import { checkPrerequisites } from "./prerequisites";
 import { checkPlan } from "./plan";
 
+import type { UseQueryResult } from "react-query";
 import type { SatisfierResult } from "planwithus-lib";
-import type { Module } from "../types";
-
-export const cleanQueries = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  queries: any[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): { hasAllData: boolean; data: any[] } => {
-  const data = [];
-  let hasAllData = true;
-
-  for (const query of queries) {
-    if (query.status !== "success") {
-      hasAllData = false;
-      continue;
-    }
-    data.push(query.data);
-  }
-
-  return { data, hasAllData };
-};
+import type { Module, ModuleInformation } from "../types";
 
 export const checks = (
   selectedModules: Module[],
   exemptedModules: Module[],
-  queries: unknown[],
+  queries: UseQueryResult<ModuleInformation>[],
   blockId: string
 ): {
   hasAllData: boolean;
@@ -52,8 +34,7 @@ export const checks = (
       .filter((module) => !module.duplicate)
       .map((module) => [
         module.code,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Number((module.moduleInfo as any)?.moduleCredit) ?? 4,
+        Number(module.moduleInfo?.moduleCredit ?? "4") ?? 4,
       ]),
     initDirectories().primary,
     blockId
@@ -94,4 +75,25 @@ const checkDuplicates = (modules: Module[]): Module[] => {
 
     return acc.concat(modules);
   }, []);
+};
+
+/**
+ * Extracts `data` from `react-query` query objects, and returns an object with a
+ * `hasAllData` boolean to indicate if all queries were successfully fetched.
+ */
+const cleanQueries = (
+  queries: UseQueryResult<ModuleInformation>[]
+): { hasAllData: boolean; data: ModuleInformation[] } => {
+  const data = [];
+  let hasAllData = true;
+
+  for (const query of queries) {
+    if (query.status !== "success") {
+      hasAllData = false;
+      continue;
+    }
+    data.push(query.data);
+  }
+
+  return { data, hasAllData };
 };

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useQueries, useQuery } from "react-query";
+import { useQueries, useQuery, UseQueryResult } from "react-query";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { Grid, makeStyles, Typography } from "@material-ui/core";
 
@@ -14,7 +14,7 @@ import { checks } from "./utils/checks";
 import { getTopLevelBlockName, getTopLevelBlocks } from "./utils/plan";
 
 import type { DropResult } from "react-beautiful-dnd";
-import type { ModuleCondensed } from "./types";
+import type { ModuleCondensed, ModuleInformation } from "./types";
 
 const YEARS = [1, 2, 3, 4];
 
@@ -61,7 +61,7 @@ export const Main = (): JSX.Element => {
         return request.json();
       },
     }))
-  );
+  ) as UseQueryResult<ModuleInformation>[];
 
   const { hasAllData, transformedData, modules, results, info } = useMemo(
     () =>
