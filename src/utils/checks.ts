@@ -70,20 +70,28 @@ export const checks = (
   };
 };
 
+/**
+ * Adds the `duplicate` property to modules which have a duplicate in the given list.
+ */
 const checkDuplicates = (modules: Module[]): Module[] => {
-  const seenModulesSet = new Set<string>();
-  return modules.map((module) => {
-    if (seenModulesSet.has(module.code)) {
-      return {
-        ...module,
-        duplicate: true,
-      };
+  modules = modules.map((module) => ({ ...module }));
+
+  const seenModulesMap: Record<string, Module[]> = {};
+
+  modules.forEach((module) => {
+    const moduleCode = module.code;
+    const modules =
+      seenModulesMap[moduleCode] || (seenModulesMap[moduleCode] = []);
+    modules.push(module);
+  });
+
+  return Object.values(seenModulesMap).reduce((acc, modules) => {
+    if (modules.length > 1) {
+      modules.forEach((module) => {
+        module.duplicate = true;
+      });
     }
 
-    seenModulesSet.add(module.code);
-    return {
-      ...module,
-      duplicate: false,
-    };
-  });
+    return acc.concat(modules);
+  }, []);
 };
