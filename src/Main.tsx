@@ -37,7 +37,6 @@ export const Main = (): JSX.Element => {
   } = useUserSelectedModules();
   const topLevelBlocks = getTopLevelBlocks();
   const [block, setBlock] = useState(topLevelBlocks[0]);
-  const blockId = block[1];
 
   // Fetch list of all modules.
   const { data: moduleInfo, status } = useQuery<ModuleCondensed[]>(
@@ -69,9 +68,9 @@ export const Main = (): JSX.Element => {
         selectedModules,
         exemptedModules,
         individualModuleInformation,
-        blockId
+        block
       ),
-    [selectedModules, exemptedModules, individualModuleInformation, blockId]
+    [selectedModules, exemptedModules, individualModuleInformation, block]
   );
 
   // Used to display drop to remove indicator.

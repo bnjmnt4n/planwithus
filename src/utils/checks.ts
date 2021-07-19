@@ -1,4 +1,3 @@
-import { verifyPlan, initDirectories } from "planwithus-lib";
 import { transform } from "./modules";
 import { checkPrerequisites } from "./prerequisites";
 import { checkPlan } from "./plan";
@@ -11,7 +10,7 @@ export const checks = (
   selectedModules: Module[],
   exemptedModules: Module[],
   queries: UseQueryResult<ModuleInformation>[],
-  blockId: string
+  block: readonly [string, string]
 ): {
   hasAllData: boolean;
   modules: Module[];
@@ -28,19 +27,7 @@ export const checks = (
     exemptedModules,
     data
   );
-
-  const checkedPlan = verifyPlan(
-    checkedPrereqModules
-      .filter((module) => !module.duplicate)
-      .map((module) => [
-        module.code,
-        Number(module.moduleInfo?.moduleCredit ?? "4") ?? 4,
-      ]),
-    initDirectories().primary,
-    blockId
-  );
-
-  const { results, info } = checkPlan(checkedPrereqModules, checkedPlan);
+  const { results, info, checkedPlan } = checkPlan(checkedPrereqModules, block);
 
   return {
     hasAllData,

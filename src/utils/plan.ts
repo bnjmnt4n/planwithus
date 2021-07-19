@@ -1,4 +1,4 @@
-import { initDirectories } from "planwithus-lib";
+import { initDirectories, verifyPlan } from "planwithus-lib";
 import { Module } from "../types";
 
 import type { SatisfierResult } from "planwithus-lib";
@@ -25,9 +25,20 @@ export const getTopLevelBlockName = ([directory, blockId]: readonly [
 
 export const checkPlan = (
   modules: Module[],
-  result: SatisfierResult
-): { results: Module[]; info: string[] } => {
-  modules = modules.map((module) => ({ ...module }));
+  [directory, blockId]: readonly [string, string]
+): { results: Module[]; info: string[]; checkedPlan: SatisfierResult } => {
+  modules = modules
+    .filter((module) => !module.duplicate)
+    .map((module) => ({ ...module }));
+
+  const checkedPlan = verifyPlan(
+    modules.map((module) => [
+      module.code,
+      Number(module.moduleInfo?.moduleCredit ?? "4") ?? 4,
+    ]),
+    DIRECTORIES[directory],
+    blockId
+  );
 
   const recurse = (result: SatisfierResult) => {
     result.results.forEach((result) => {
@@ -64,9 +75,13 @@ export const checkPlan = (
       }
     });
   };
-  recurse(result);
+  recurse(checkedPlan);
 
-  return { results: modules, info: Array.from(getInfo(result)) };
+  return {
+    results: modules,
+    info: Array.from(getInfo(checkedPlan)),
+    checkedPlan,
+  };
 };
 
 export const getInfo = (
