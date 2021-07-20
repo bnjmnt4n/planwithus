@@ -8,6 +8,7 @@ import { Combobox } from "./Combobox";
 import { Year } from "./Year";
 import { ModuleList } from "./ModuleList";
 import { AddModule } from "./AddModule";
+import { ModuleMap } from "./ModuleMap";
 import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
 import { move, removeModule, swapPosition } from "./utils/modules";
 import { checks } from "./utils/checks";
@@ -57,11 +58,18 @@ export const Main = (): JSX.Element => {
     }))
   ) as UseQueryResult<ModuleInformation>[];
 
-  const { hasAllData, moduleIndices, modules, checkedResults, results, info } =
-    useMemo(
-      () => checks(selectedModules.modules, individualModuleInformation, block),
-      [selectedModules, individualModuleInformation, block]
-    );
+  const {
+    hasAllData,
+    moduleIndices,
+    modules,
+    checkedResults,
+    // results,
+    info,
+    moduleMap,
+  } = useMemo(
+    () => checks(selectedModules.modules, individualModuleInformation, block),
+    [selectedModules, individualModuleInformation, block]
+  );
 
   // Used to display drop to remove indicator.
   const [isDragging, setIsDragging] = useState(false);
@@ -144,7 +152,7 @@ export const Main = (): JSX.Element => {
             className={classes.root}
             spacing={3}
           >
-            <div style={{ flex: "1 0 20%", padding: 20 }}>
+            <div style={{ flex: "1 0 500px", padding: 20 }}>
               <p>Selected block: {getTopLevelBlockName(block)}</p>
               <Combobox
                 items={topLevelBlocks}
@@ -155,8 +163,8 @@ export const Main = (): JSX.Element => {
                 itemToString={(block) => getTopLevelBlockName(block)}
                 onItemSelected={(block) => setBlock(block)}
               />
-              <p>{results.isSatisfied ? "satisfied" : results.message}</p>
               <p>{info.join("\n")}</p>
+              <ModuleMap key={moduleMap.ref} moduleMap={moduleMap} />
             </div>
 
             <Grid item>

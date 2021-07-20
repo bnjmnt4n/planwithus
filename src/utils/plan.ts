@@ -23,10 +23,25 @@ export const getTopLevelBlockName = ([directory, blockId]: readonly [
   return block.name ?? "";
 };
 
+export type ModuleMap = {
+  ref: string;
+  assigned: number;
+  showSatisfiedWarnings: boolean;
+  satisfied: boolean;
+  message?: string;
+  info?: string;
+  children: ModuleMap[];
+};
+
 export const checkPlan = (
   modules: Module[],
   [directory, blockId]: readonly [string, string]
-): { results: Module[]; info: string[]; checkedPlan: SatisfierResult } => {
+): {
+  results: Module[];
+  info: string[];
+  checkedPlan: SatisfierResult;
+  moduleMap: ModuleMap;
+} => {
   const seenModulesSet = new Set<string>();
   modules = modules
     .filter((module) => {
@@ -45,47 +60,107 @@ export const checkPlan = (
     blockId
   );
 
-  const recurse = (result: SatisfierResult) => {
+  const getModule = (moduleCode: string) => {
+    const module = modules.find((module) => module.code === moduleCode);
+    if (!module) {
+      throw new Error(`Expected to find module: ${moduleCode}`);
+    }
+    return module;
+  };
+
+  const recurse = (result: SatisfierResult, moduleMapList: ModuleMap[]) => {
+    const parentRef = result.ref;
+    const moduleMapObject = {
+      ref: parentRef,
+      assigned: result.added.length,
+      showSatisfiedWarnings: true,
+      satisfied: result.isSatisfied,
+      message: result.message,
+      info: result.info,
+      children: [],
+    };
+    moduleMapList.push(moduleMapObject);
+
     result.results.forEach((result) => {
       if (isAssignBlock(result)) {
         result.results.forEach((result) => {
+          // Do not show satisfy warnings if any block does not have modules assigned.
+          // We make this assumption to reduce the number of warnings displayed.
+          if (!result.added.length) {
+            moduleMapObject.showSatisfiedWarnings = false;
+          }
+
           if (!result.context) {
             return;
           }
 
           const block = result.context as SatisfierResult;
           block.added.forEach(([moduleCode]) => {
-            const module = modules.find((module) => module.code === moduleCode);
-            if (!module) throw new Error("Missing module");
-            module.assignedBlock = block.ref;
+            const module = getModule(moduleCode);
+            (module.assignedBlock || (module.assignedBlock = [])).push(
+              block.ref
+            );
           });
-          recurse(block);
+          recurse(block, moduleMapObject.children);
         });
       } else if (isMatchBlock(result)) {
+        // TODO: single match result?
+        if (!result.results.length) {
+          // Do not show satisfy warnings if any block does not have modules assigned.
+          // We make this assumption to reduce the number of warnings displayed.
+          if (!result.added.length) {
+            moduleMapObject.showSatisfiedWarnings = false;
+          }
+        }
+
         result.results.forEach((block) => {
+          // Do not show satisfy warnings if any block does not have modules assigned.
+          // We make this assumption to reduce the number of warnings displayed.
+          if (!block.added.length) {
+            moduleMapObject.showSatisfiedWarnings = false;
+          }
+
           block.added.forEach(([moduleCode]) => {
-            const module = modules.find((module) => module.code === moduleCode);
-            if (!module) throw new Error("Missing module");
-            module.assignedBlock = block.ref;
+            const module = getModule(moduleCode);
+            (module.assignedBlock || (module.assignedBlock = [])).push(
+              block.ref
+            );
           });
+          recurse(block, moduleMapObject.children);
         });
       } else if (isSatisfyBlock(result)) {
+        // Only show satisfy warnings for blocks with assigned modules to avoid showing too many warnings.
+        if (!moduleMapObject.showSatisfiedWarnings) {
+          // TODO: show MC warnings
+          return;
+        }
+
         if (result.isSatisfied) {
-          // No-op
+          // TODO
+          return;
         } else {
-          result.results.forEach(() => {
-            // TODO
+          result.results.forEach((result) => {
+            if (!result.context) return;
+            recurse(
+              result.context as SatisfierResult,
+              moduleMapObject.children
+            );
           });
         }
       }
     });
   };
-  recurse(checkedPlan);
+
+  const moduleMapList: ModuleMap[] = [];
+  recurse(checkedPlan, moduleMapList);
+  console.log(checkedPlan);
+  console.log(moduleMapList[0]);
 
   return {
     results: modules,
     info: Array.from(getInfo(checkedPlan)),
     checkedPlan,
+    moduleMap: moduleMapList[0],
   };
 };
 

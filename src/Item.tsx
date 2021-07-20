@@ -29,7 +29,7 @@ export const Item = ({
   const missingPrerequisites = module?.missingPrerequisites;
   const individualModuleInfo = module?.moduleInfo;
   const duplicate = module?.duplicate;
-  const assignedBlock = module?.assignedBlock;
+  const assignedBlock = module?.assignedBlock?.join(";");
 
   return (
     <Draggable draggableId={getModuleId(module)} index={index}>
