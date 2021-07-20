@@ -86,7 +86,7 @@ export const getBlockName = (
   return blockName;
 };
 
-export type ModuleMap = {
+export type CheckedPlanResult = {
   ref: string;
   name?: string;
   assigned: number;
@@ -95,7 +95,7 @@ export type ModuleMap = {
   satisfied: boolean;
   message?: string;
   info?: string;
-  children: ModuleMap[];
+  children: CheckedPlanResult[];
 };
 
 export const checkPlan = (
@@ -105,7 +105,7 @@ export const checkPlan = (
   results: Module[];
   info: string[];
   checkedPlan: SatisfierResult;
-  moduleMap: ModuleMap;
+  checkedPlanResult: CheckedPlanResult;
 } => {
   const seenModulesSet = new Set<string>();
   modules = modules
@@ -144,13 +144,13 @@ export const checkPlan = (
 
   const recurse = (
     result: SatisfierResult,
-    moduleMapList: ModuleMap[],
+    checkedPlanResultList: CheckedPlanResult[],
     // TODO: make use of this to get the block
     parentRef: string
   ) => {
     const currentRef = result.ref;
     const mainResult = result;
-    const moduleMapObject = {
+    const checkedPlanResult = {
       ref: currentRef,
       name: getBlockName(directory, currentRef, parentRef),
       assigned: result.added.length,
@@ -161,15 +161,17 @@ export const checkPlan = (
       info: result.info,
       children: [],
     };
-    moduleMapList.push(moduleMapObject);
+    checkedPlanResultList.push(checkedPlanResult);
 
     result.results.forEach((result) => {
+      // ASSIGN BLOCKS
+      // -------------
       if (isAssignBlock(result)) {
         result.results.forEach((result) => {
           // Do not show satisfy warnings if any block does not have modules assigned.
           // We make this assumption to reduce the number of warnings displayed.
           if (!result.added.length) {
-            moduleMapObject.showSatisfiedWarnings = false;
+            checkedPlanResult.showSatisfiedWarnings = false;
           }
 
           if (!result.context) {
@@ -177,27 +179,30 @@ export const checkPlan = (
           }
 
           const block = result.context as SatisfierResult;
-          recurse(block, moduleMapObject.children, currentRef);
+          recurse(block, checkedPlanResult.children, currentRef);
           block.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
-              moduleMapObject.possibleAssignments++;
+              checkedPlanResult.possibleAssignments++;
             }
           });
         });
-      } else if (isMatchBlock(result)) {
+      }
+      // MATCH BLOCKS
+      // ------------
+      else if (isMatchBlock(result)) {
         // TODO: single match result? is this accurate?
         if (!result.results.length) {
           // Do not show satisfy warnings if any block does not have modules assigned.
           // We make this assumption to reduce the number of warnings displayed.
           if (!result.added.length) {
-            moduleMapObject.showSatisfiedWarnings = false;
+            checkedPlanResult.showSatisfiedWarnings = false;
           }
 
           result.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, result.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
-              moduleMapObject.possibleAssignments++;
+              checkedPlanResult.possibleAssignments++;
             }
           });
         }
@@ -206,18 +211,21 @@ export const checkPlan = (
           // Do not show satisfy warnings if any block does not have modules assigned.
           // We make this assumption to reduce the number of warnings displayed.
           if (!block.added.length) {
-            moduleMapObject.showSatisfiedWarnings = false;
+            checkedPlanResult.showSatisfiedWarnings = false;
           }
 
-          recurse(block, moduleMapObject.children, currentRef);
+          recurse(block, checkedPlanResult.children, currentRef);
           block.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
-              moduleMapObject.possibleAssignments++;
+              checkedPlanResult.possibleAssignments++;
             }
           });
         });
-      } else if (isSatisfyBlock(result)) {
+      }
+      // SATISFY BLOCKS
+      // --------------
+      else if (isSatisfyBlock(result)) {
         if (!result.results.length) {
           // TODO: is this necessary?
         }
@@ -226,44 +234,42 @@ export const checkPlan = (
           const block = (result.context as SatisfierResult) || result;
           // Only show satisfy warnings for blocks with assigned modules to avoid showing too many warnings.
           if (
-            !moduleMapObject.showSatisfiedWarnings &&
+            !checkedPlanResult.showSatisfiedWarnings &&
             !isSatisfyMcBlock(block)
           ) {
             return;
           }
 
-          recurse(block, moduleMapObject.children, currentRef);
+          recurse(block, checkedPlanResult.children, currentRef);
         });
       }
     });
 
     // Add possible assignments from child results as well.
-    moduleMapObject.possibleAssignments += moduleMapObject.children.reduce(
-      (sum, { possibleAssignments }: ModuleMap) => sum + possibleAssignments,
+    checkedPlanResult.possibleAssignments += checkedPlanResult.children.reduce(
+      (sum, { possibleAssignments }: CheckedPlanResult) =>
+        sum + possibleAssignments,
       0
     );
   };
 
-  const moduleMapList: ModuleMap[] = [];
-  recurse(checkedPlan, moduleMapList, "");
-  console.log(checkedPlan);
-  console.log(moduleMapList[0]);
+  const checkedPlanResultList: CheckedPlanResult[] = [];
+  recurse(checkedPlan, checkedPlanResultList, "");
+  // console.log(checkedPlan);
+  // console.log(moduleMapList[0]);
 
   return {
     results: modules,
-    info: Array.from(getInfo(checkedPlan)),
+    info: getInfo(checkedPlan),
     checkedPlan,
-    moduleMap: moduleMapList[0],
+    checkedPlanResult: checkedPlanResultList[0],
   };
 };
 
-export const getInfo = (
-  result: SatisfierResult,
-  info?: Set<string>
-): Set<string> => {
-  info || (info = new Set());
-  if (result.info) {
-    info.add(result.info);
+export const getInfo = (result: SatisfierResult, info?: string[]): string[] => {
+  info || (info = []);
+  if (result.info && !info.includes(result.info)) {
+    info.push(result.info);
   }
 
   result.results.forEach((result) => getInfo(result, info));

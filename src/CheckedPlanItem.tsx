@@ -4,13 +4,13 @@ import CloseIcon from "@material-ui/icons/Close";
 import { green, red } from "@material-ui/core/colors";
 import { useModuleContext } from "./ModuleContext";
 
-import type { ModuleMap as ModuleMapType } from "./utils/plan";
+import type { CheckedPlanResult } from "./utils/plan";
 
-export const ModuleMap = ({
-  moduleMap: module,
+export const CheckedPlanItem = ({
+  checkedPlanResult: module,
   ...props
 }: {
-  moduleMap: ModuleMapType;
+  checkedPlanResult: CheckedPlanResult;
 } & React.HTMLProps<HTMLDivElement>): JSX.Element => {
   const { setHighlightedBlock } = useModuleContext();
 
@@ -73,7 +73,7 @@ export const ModuleMap = ({
       {isChildrenShown && (
         <div style={{ marginLeft: 20 }}>
           {module.children.map((module) => (
-            <ModuleMap key={module.ref} moduleMap={module} />
+            <CheckedPlanItem key={module.ref} checkedPlanResult={module} />
           ))}
         </div>
       )}

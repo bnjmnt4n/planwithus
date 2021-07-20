@@ -8,7 +8,7 @@ import { Combobox } from "./Combobox";
 import { Year } from "./Year";
 import { ModuleList } from "./ModuleList";
 import { AddModule } from "./AddModule";
-import { ModuleMap } from "./ModuleMap";
+import { CheckedPlanItem } from "./CheckedPlanItem";
 import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
 import { move, removeModule, swapPosition } from "./utils/modules";
 import { checks } from "./utils/checks";
@@ -66,7 +66,7 @@ export const Main = (): JSX.Element => {
     checkedResults,
     // results,
     info,
-    moduleMap,
+    checkedPlanResult,
   } = useMemo(
     () => checks(selectedModules.modules, individualModuleInformation, block),
     [selectedModules, individualModuleInformation, block]
@@ -167,9 +167,9 @@ export const Main = (): JSX.Element => {
                 onItemSelected={(block) => setBlock(block)}
               />
               <p>{info.join("\n")}</p>
-              <ModuleMap
-                key={moduleMap.ref}
-                moduleMap={moduleMap}
+              <CheckedPlanItem
+                key={checkedPlanResult.ref}
+                checkedPlanResult={checkedPlanResult}
                 onMouseOut={() => setHighlightedBlock("")}
               />
             </div>

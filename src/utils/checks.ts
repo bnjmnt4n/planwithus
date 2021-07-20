@@ -5,7 +5,7 @@ import { checkPlan } from "./plan";
 import type { UseQueryResult } from "react-query";
 import type { SatisfierResult } from "planwithus-lib";
 import type { Module, ModuleInformation } from "../types";
-import type { ModuleMap } from "./plan";
+import type { CheckedPlanResult } from "./plan";
 
 export const checks = (
   modules: Module[],
@@ -18,7 +18,7 @@ export const checks = (
   moduleIndices: number[][][];
   results: SatisfierResult;
   info: string[];
-  moduleMap: ModuleMap;
+  checkedPlanResult: CheckedPlanResult;
 } => {
   const { hasAllData, data } = cleanQueries(queries);
 
@@ -39,7 +39,7 @@ export const checks = (
     exemptedModules,
     data
   );
-  const { results, info, checkedPlan, moduleMap } = checkPlan(
+  const { results, info, checkedPlan, checkedPlanResult } = checkPlan(
     checkedPrereqModules,
     block
   );
@@ -52,7 +52,7 @@ export const checks = (
     checkedResults: results,
     moduleIndices,
     results: checkedPlan,
-    moduleMap,
+    checkedPlanResult,
     info,
   };
 };
