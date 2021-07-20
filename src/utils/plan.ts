@@ -114,12 +114,12 @@ export const getBreadCrumbTrailFromAnyDirectory = (
   const breadCrumbs = [];
   let { length } = blockSegments;
   while (length--) {
-    if (length === 0 || blockSegments[length - 1] === "assign") {
+    if (blockSegments[length] === "assign") {
       continue;
     }
 
     breadCrumbs.unshift(
-      getBlockNameFromAnyDirectory(blockSegments.slice(0, length).join("/"))
+      getBlockNameFromAnyDirectory(blockSegments.slice(0, length + 1).join("/"))
     );
   }
 
@@ -325,8 +325,6 @@ export const checkPlan = (
 
   const checkedPlanResultList: CheckedPlanResult[] = [];
   recurse(checkedPlan, checkedPlanResultList, "", true);
-  console.log(checkedPlan);
-  // console.log(moduleMapList[0]);
 
   return {
     results: modules,
