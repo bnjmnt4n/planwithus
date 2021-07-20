@@ -40,7 +40,9 @@ export const getBlockName = (
 
   let blockName = blockNameMap.get(blockRef);
   if (!blockName) {
-    let blockSegments = blockRef.split(/\/(?:assign|match|satisfy)\//g);
+    let blockSegments = blockRef.split(
+      /\/(?:assign|match|satisfy(?:\/\d+(?!\/mc|\/or|\/and))?)\//g
+    );
     const lastSegment = blockSegments[blockSegments.length - 1];
 
     // Remove all and/or/mc block refs since they won't have a name.
