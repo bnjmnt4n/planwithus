@@ -28,6 +28,8 @@ const useComboboxStyles = makeStyles(() => ({
   },
 }));
 
+const NUM_ITEMS_SHOWN = 50;
+
 export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
   items,
   label,
@@ -38,8 +40,10 @@ export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
   onItemSelected,
 }) => {
   const classes = useComboboxStyles();
-  // TODO: currently capping at the first 100 items to avoid performance issues when rendering.
-  const [filteredItems, setFilteredItems] = useState(() => items.slice(0, 100));
+  // TODO: currently capping at the first 50 items to avoid performance issues when rendering.
+  const [filteredItems, setFilteredItems] = useState(() =>
+    items.slice(0, NUM_ITEMS_SHOWN)
+  );
 
   const {
     isOpen,
@@ -55,6 +59,8 @@ export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
     selectItem,
   } = useCombobox({
     items: filteredItems,
+    // Highlight first item by default.
+    defaultHighlightedIndex: 0,
     itemToString: (item) => (item ? itemToString(item) : ""),
     onInputValueChange: ({ inputValue }) => {
       if (inputValue) {
@@ -65,10 +71,10 @@ export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
                 .toLowerCase()
                 .startsWith(inputValue.toLowerCase())
             )
-            .slice(0, 100)
+            .slice(0, NUM_ITEMS_SHOWN)
         );
       } else {
-        setFilteredItems(items.slice(0, 100));
+        setFilteredItems(items.slice(0, NUM_ITEMS_SHOWN));
       }
     },
     onSelectedItemChange: ({ selectedItem }) => {
