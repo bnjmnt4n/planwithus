@@ -31,7 +31,7 @@ export const ModuleMap = ({
           ) : (
             <CloseIcon style={{ color: red[500] }} />
           )}{" "}
-          {module.ref}
+          {module.name || module.ref}
         </h2>
         {hasChildren && (
           <button

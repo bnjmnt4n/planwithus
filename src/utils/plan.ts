@@ -23,8 +23,70 @@ export const getTopLevelBlockName = ([directory, blockId]: readonly [
   return block.name ?? "";
 };
 
+const directoryBlockNameMap: Map<string, Map<string, string>> = new Map();
+export const getBlockName = (
+  directory: string,
+  blockRef: string,
+  // TODO: simplify using this?
+  _parentBlockRef: string
+): string => {
+  let blockNameMap = directoryBlockNameMap.get(directory);
+  if (!blockNameMap) {
+    blockNameMap = new Map();
+    directoryBlockNameMap.set(directory, blockNameMap);
+  }
+
+  let blockName = blockNameMap.get(blockRef);
+  if (!blockName) {
+    let blockSegments = blockRef.split(/\/(?:assign|match|satisfy)\//g);
+    const lastSegment = blockSegments[blockSegments.length - 1];
+
+    // Remove all and/or/mc block refs since they won't have a name.
+    if (/^(\d+)(\/or|\/mc|\/and)?$/.test(lastSegment)) {
+      const segments = blockRef.slice(0, -lastSegment.length - 1).split("/");
+      const parentName = getBlockName(
+        directory,
+        segments.slice(0, -1).join("/"),
+        ""
+      );
+      const ruleType = segments[segments.length - 1];
+      blockName = `${parentName ? parentName + " " : ""}${ruleType} rule`;
+
+      blockNameMap.set(blockRef, blockName);
+      return blockName;
+    }
+    blockSegments = blockSegments.flatMap((segment) => segment.split("/"));
+
+    const blockIdPossibilities = blockSegments.map((_, index) => {
+      const slice = blockSegments.length - index - 1;
+      return [blockSegments.slice(0, slice).join("/"), lastSegment];
+    });
+
+    for (const [prefix, blockId] of blockIdPossibilities) {
+      try {
+        const [, block] = DIRECTORIES[
+          directory as keyof typeof DIRECTORIES
+        ].find(prefix, blockId);
+
+        blockName = block.name ?? "";
+        if (blockName) {
+          continue;
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+
+    blockName || (blockName = "");
+    blockNameMap.set(blockRef, blockName);
+  }
+
+  return blockName;
+};
+
 export type ModuleMap = {
   ref: string;
+  name?: string;
   assigned: number;
   showSatisfiedWarnings: boolean;
   satisfied: boolean;
@@ -73,10 +135,15 @@ export const checkPlan = (
     (module.assignedBlock || (module.assignedBlock = [])).push(blockRef);
   };
 
-  const recurse = (result: SatisfierResult, moduleMapList: ModuleMap[]) => {
-    const parentRef = result.ref;
+  const recurse = (
+    result: SatisfierResult,
+    moduleMapList: ModuleMap[],
+    parentRef: string
+  ) => {
+    const currentRef = result.ref;
     const moduleMapObject = {
-      ref: parentRef,
+      ref: currentRef,
+      name: getBlockName(directory, currentRef, parentRef),
       assigned: result.added.length,
       showSatisfiedWarnings: true,
       satisfied: result.isSatisfied,
@@ -103,7 +170,7 @@ export const checkPlan = (
           block.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, block.ref);
           });
-          recurse(block, moduleMapObject.children);
+          recurse(block, moduleMapObject.children, currentRef);
         });
       } else if (isMatchBlock(result)) {
         // TODO: single match result? is this accurate?
@@ -129,7 +196,7 @@ export const checkPlan = (
           block.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, block.ref);
           });
-          recurse(block, moduleMapObject.children);
+          recurse(block, moduleMapObject.children, currentRef);
         });
       } else if (isSatisfyBlock(result)) {
         // TODO: is this necessary?
@@ -147,14 +214,14 @@ export const checkPlan = (
             return;
           }
 
-          recurse(block, moduleMapObject.children);
+          recurse(block, moduleMapObject.children, currentRef);
         });
       }
     });
   };
 
   const moduleMapList: ModuleMap[] = [];
-  recurse(checkedPlan, moduleMapList);
+  recurse(checkedPlan, moduleMapList, "");
   console.log(checkedPlan);
   console.log(moduleMapList[0]);
 
