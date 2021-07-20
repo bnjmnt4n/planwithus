@@ -33,6 +33,7 @@ export const Main = (): JSX.Element => {
   const { selectedModules, setSelectedModules } = useUserSelectedModules();
   const topLevelBlocks = getTopLevelBlocks();
   const [block, setBlock] = useState(topLevelBlocks[0]);
+  const [highlightedBlock, setHighlightedBlock] = useState("");
 
   // Fetch list of all modules.
   const { data: allModulesInformation, status } = useQuery<ModuleCondensed[]>(
@@ -128,6 +129,8 @@ export const Main = (): JSX.Element => {
         allModulesInformation,
         selectedModules,
         setSelectedModules,
+        highlightedBlock,
+        setHighlightedBlock,
       }}
     >
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
@@ -164,7 +167,11 @@ export const Main = (): JSX.Element => {
                 onItemSelected={(block) => setBlock(block)}
               />
               <p>{info.join("\n")}</p>
-              <ModuleMap key={moduleMap.ref} moduleMap={moduleMap} />
+              <ModuleMap
+                key={moduleMap.ref}
+                moduleMap={moduleMap}
+                onMouseOut={() => setHighlightedBlock("")}
+              />
             </div>
 
             <Grid item>

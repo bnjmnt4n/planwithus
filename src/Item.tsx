@@ -19,7 +19,8 @@ export const Item = ({
   onRemove,
 }: ItemProps): JSX.Element => {
   const classes = useItemStyles();
-  const { getModule, allModulesInformation } = useModuleContext();
+  const { getModule, highlightedBlock, allModulesInformation } =
+    useModuleContext();
 
   const module = getModule(index);
   const itemInfo = allModulesInformation.find(
@@ -31,6 +32,10 @@ export const Item = ({
   const duplicate = module?.duplicate;
   const assignedBlock = module?.assignedBlock?.join(";");
 
+  const isCurrentModuleHighlighted = (module?.assignedBlock ?? []).includes(
+    highlightedBlock
+  );
+
   return (
     <Draggable draggableId={getModuleId(module)} index={index}>
       {(provided, snapshot) => (
@@ -38,7 +43,13 @@ export const Item = ({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={snapshot.isDragging ? classes.dragging : classes.idle}
+          className={
+            snapshot.isDragging
+              ? classes.dragging
+              : isCurrentModuleHighlighted
+              ? classes.highlighted
+              : classes.idle
+          }
           elevation={snapshot.isDragging ? 10 : 1}
         >
           <div

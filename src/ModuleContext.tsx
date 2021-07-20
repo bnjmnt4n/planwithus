@@ -13,6 +13,8 @@ type ModuleContextValue = {
   addModule: (module: Module, addBeforeIndex: number) => void;
   removeModule: (toRemoveIndex: number) => void;
   getModule: (index: number) => Module;
+  highlightedBlock: string;
+  setHighlightedBlock: (value: React.SetStateAction<string>) => void;
 };
 
 const ModuleContext = createContext<ModuleContextValue>(
@@ -26,6 +28,8 @@ type ModuleContextProviderProps = {
     checkedResults: Module[];
     selectedModules: ModuleList;
     setSelectedModules: (value: React.SetStateAction<ModuleList>) => void;
+    highlightedBlock: string;
+    setHighlightedBlock: (value: React.SetStateAction<string>) => void;
     allModulesInformation: ModuleContextValue["allModulesInformation"];
   };
 };
@@ -38,8 +42,14 @@ export const ModuleContextProvider = ({
   value,
   children,
 }: ModuleContextProviderProps): JSX.Element => {
-  const { modules, checkedResults, setSelectedModules, allModulesInformation } =
-    value;
+  const {
+    modules,
+    highlightedBlock,
+    setHighlightedBlock,
+    checkedResults,
+    setSelectedModules,
+    allModulesInformation,
+  } = value;
 
   const addModule = useCallback(
     (module: Module, addBeforeIndex: number) => {
@@ -81,8 +91,18 @@ export const ModuleContextProvider = ({
       addModule,
       removeModule,
       getModule,
+      highlightedBlock,
+      setHighlightedBlock,
     }),
-    [modules, allModulesInformation, addModule, removeModule, getModule]
+    [
+      modules,
+      allModulesInformation,
+      addModule,
+      removeModule,
+      getModule,
+      highlightedBlock,
+      setHighlightedBlock,
+    ]
   );
 
   return (
