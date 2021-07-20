@@ -10,7 +10,8 @@ export type Module = {
   // TODO: extra info
   missingPrerequisites?: PrerequisiteTree[] | null;
   duplicate?: boolean;
-  assignedBlock?: string[];
+  assignedBlock?: string;
+  possibleAssignedBlocks?: string[];
   moduleInfo?: ModuleInformation | null;
 };
 

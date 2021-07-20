@@ -30,11 +30,12 @@ export const Item = ({
   const missingPrerequisites = module?.missingPrerequisites;
   const individualModuleInfo = module?.moduleInfo;
   const duplicate = module?.duplicate;
-  const assignedBlock = module?.assignedBlock?.join(";");
+  const assignedBlock = module?.assignedBlock ?? "";
+  const possibleAssignedBlocks = module?.possibleAssignedBlocks ?? [];
 
   const isCurrentModuleHighlighted =
     highlightedBlock &&
-    (module?.assignedBlock ?? []).some((block) =>
+    [assignedBlock, ...possibleAssignedBlocks].some((block) =>
       block.startsWith(highlightedBlock)
     );
 
@@ -71,6 +72,9 @@ export const Item = ({
               {!individualModuleInfo && <p>Loading module information...</p>}
               {duplicate && <p>Duplicate module</p>}
               {assignedBlock && <p>Assigned to block: {assignedBlock}</p>}
+              {possibleAssignedBlocks && (
+                <p>Possible matches: {possibleAssignedBlocks.join(", ")}</p>
+              )}
               {missingPrerequisites && (
                 <p>
                   Missing prerequisites:

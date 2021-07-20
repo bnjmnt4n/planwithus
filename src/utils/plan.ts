@@ -133,9 +133,22 @@ export const checkPlan = (
     return module;
   };
 
-  const addAssignedBlockToModule = (moduleCode: string, blockRef: string) => {
+  const addPossibleAssignedBlockToModule = (
+    moduleCode: string,
+    blockRef: string
+  ) => {
     const module = getModule(moduleCode);
-    (module.assignedBlock || (module.assignedBlock = [])).push(blockRef);
+    const possibleAssignedBlocks =
+      module.possibleAssignedBlocks || (module.possibleAssignedBlocks = []);
+    // Only add a block ref if it isn't an ancestor of one of the possible
+    // assigned blocks.
+    if (
+      possibleAssignedBlocks.every(
+        (innerBlockRef) => !innerBlockRef.startsWith(blockRef)
+      )
+    ) {
+      possibleAssignedBlocks.push(blockRef);
+    }
   };
 
   const isModuleInList = (list: [string, number][], moduleCode: string) => {
@@ -146,7 +159,8 @@ export const checkPlan = (
     result: SatisfierResult,
     checkedPlanResultList: CheckedPlanResult[],
     // TODO: make use of this to get the block
-    parentRef: string
+    parentRef: string,
+    isTopLevel = false
   ) => {
     const currentRef = result.ref;
     const mainResult = result;
@@ -181,7 +195,7 @@ export const checkPlan = (
           const block = result.context as SatisfierResult;
           recurse(block, checkedPlanResult.children, currentRef);
           block.added.forEach(([moduleCode]) => {
-            addAssignedBlockToModule(moduleCode, block.ref);
+            addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
               checkedPlanResult.possibleAssignments++;
             }
@@ -200,7 +214,7 @@ export const checkPlan = (
           }
 
           result.added.forEach(([moduleCode]) => {
-            addAssignedBlockToModule(moduleCode, result.ref);
+            addPossibleAssignedBlockToModule(moduleCode, result.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
               checkedPlanResult.possibleAssignments++;
             }
@@ -216,7 +230,7 @@ export const checkPlan = (
 
           recurse(block, checkedPlanResult.children, currentRef);
           block.added.forEach(([moduleCode]) => {
-            addAssignedBlockToModule(moduleCode, block.ref);
+            addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
               checkedPlanResult.possibleAssignments++;
             }
@@ -251,11 +265,27 @@ export const checkPlan = (
         sum + possibleAssignments,
       0
     );
+
+    // If this is the top level block, we can finalize the list of assigned
+    // modules.
+    if (isTopLevel) {
+      result.assigned.forEach(([moduleCode]) => {
+        const module = getModule(moduleCode);
+        // Assigned modules should have only 1 potential assignment.
+        if (module.possibleAssignedBlocks?.length !== 1) {
+          throw new Error(
+            `Expected module ${moduleCode} to have been assigned to ${currentRef}`
+          );
+        }
+        module.possibleAssignedBlocks = [];
+        module.assignedBlock = currentRef;
+      });
+    }
   };
 
   const checkedPlanResultList: CheckedPlanResult[] = [];
-  recurse(checkedPlan, checkedPlanResultList, "");
-  // console.log(checkedPlan);
+  recurse(checkedPlan, checkedPlanResultList, "", true);
+  console.log(checkedPlan);
   // console.log(moduleMapList[0]);
 
   return {
