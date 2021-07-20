@@ -7,7 +7,9 @@ const DIRECTORIES = initDirectories();
 
 export const getTopLevelBlocks = (): (readonly [string, string])[] => {
   return Object.entries(DIRECTORIES).flatMap(([name, blocks]) => {
-    return blocks.retrieveTopLevel().map((blockId) => [name, blockId] as const);
+    return blocks
+      .retrieveSelectable()
+      .map((blockId) => [name, blockId] as const);
   });
 };
 
