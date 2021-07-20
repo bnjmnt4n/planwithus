@@ -32,9 +32,11 @@ export const Item = ({
   const duplicate = module?.duplicate;
   const assignedBlock = module?.assignedBlock?.join(";");
 
-  const isCurrentModuleHighlighted = (module?.assignedBlock ?? []).includes(
-    highlightedBlock
-  );
+  const isCurrentModuleHighlighted =
+    highlightedBlock &&
+    (module?.assignedBlock ?? []).some((block) =>
+      block.startsWith(highlightedBlock)
+    );
 
   return (
     <Draggable draggableId={getModuleId(module)} index={index}>

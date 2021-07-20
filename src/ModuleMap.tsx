@@ -46,6 +46,13 @@ export const ModuleMap = ({
           <strong>Assigned modules: </strong>
           {module.assigned}
           <br />
+          {!!module.possibleAssignments && (
+            <>
+              <strong>Possible matches: </strong>
+              {module.possibleAssignments}
+              <br />
+            </>
+          )}
           {module.message && (
             <>
               <strong>Message: </strong>

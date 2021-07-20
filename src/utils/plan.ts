@@ -90,6 +90,7 @@ export type ModuleMap = {
   ref: string;
   name?: string;
   assigned: number;
+  possibleAssignments: number;
   showSatisfiedWarnings: boolean;
   satisfied: boolean;
   message?: string;
@@ -137,16 +138,23 @@ export const checkPlan = (
     (module.assignedBlock || (module.assignedBlock = [])).push(blockRef);
   };
 
+  const isModuleInList = (list: [string, number][], moduleCode: string) => {
+    return list.some(([innerModuleCode]) => innerModuleCode === moduleCode);
+  };
+
   const recurse = (
     result: SatisfierResult,
     moduleMapList: ModuleMap[],
+    // TODO: make use of this to get the block
     parentRef: string
   ) => {
     const currentRef = result.ref;
+    const mainResult = result;
     const moduleMapObject = {
       ref: currentRef,
       name: getBlockName(directory, currentRef, parentRef),
       assigned: result.added.length,
+      possibleAssignments: 0,
       showSatisfiedWarnings: true,
       satisfied: result.isSatisfied,
       message: result.message,
@@ -169,10 +177,13 @@ export const checkPlan = (
           }
 
           const block = result.context as SatisfierResult;
+          recurse(block, moduleMapObject.children, currentRef);
           block.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, block.ref);
+            if (!isModuleInList(mainResult.added, moduleCode)) {
+              moduleMapObject.possibleAssignments++;
+            }
           });
-          recurse(block, moduleMapObject.children, currentRef);
         });
       } else if (isMatchBlock(result)) {
         // TODO: single match result? is this accurate?
@@ -185,6 +196,9 @@ export const checkPlan = (
 
           result.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, result.ref);
+            if (!isModuleInList(mainResult.added, moduleCode)) {
+              moduleMapObject.possibleAssignments++;
+            }
           });
         }
 
@@ -195,15 +209,17 @@ export const checkPlan = (
             moduleMapObject.showSatisfiedWarnings = false;
           }
 
+          recurse(block, moduleMapObject.children, currentRef);
           block.added.forEach(([moduleCode]) => {
             addAssignedBlockToModule(moduleCode, block.ref);
+            if (!isModuleInList(mainResult.added, moduleCode)) {
+              moduleMapObject.possibleAssignments++;
+            }
           });
-          recurse(block, moduleMapObject.children, currentRef);
         });
       } else if (isSatisfyBlock(result)) {
-        // TODO: is this necessary?
         if (!result.results.length) {
-          // TODO
+          // TODO: is this necessary?
         }
 
         result.results.forEach((result) => {
@@ -220,6 +236,12 @@ export const checkPlan = (
         });
       }
     });
+
+    // Add possible assignments from child results as well.
+    moduleMapObject.possibleAssignments += moduleMapObject.children.reduce(
+      (sum, { possibleAssignments }: ModuleMap) => sum + possibleAssignments,
+      0
+    );
   };
 
   const moduleMapList: ModuleMap[] = [];
