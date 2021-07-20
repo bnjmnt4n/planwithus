@@ -6,6 +6,7 @@ import { useItemStyles } from "./listStyles";
 import { useModuleContext } from "./ModuleContext";
 import { getModuleId } from "./utils/modules";
 import { printMissingPrerequisites } from "./utils/prerequisites";
+import { getBreadCrumbTrailFromAnyDirectory } from "./utils/plan";
 
 type ItemProps = {
   index: number;
@@ -71,9 +72,23 @@ export const Item = ({
             <>
               {!individualModuleInfo && <p>Loading module information...</p>}
               {duplicate && <p>Duplicate module</p>}
-              {assignedBlock && <p>Assigned to block: {assignedBlock}</p>}
-              {possibleAssignedBlocks && (
-                <p>Possible matches: {possibleAssignedBlocks.join(", ")}</p>
+              {assignedBlock && (
+                <p>
+                  Assigned to block:{" "}
+                  {getBreadCrumbTrailFromAnyDirectory(assignedBlock).join(
+                    " > "
+                  )}
+                </p>
+              )}
+              {!!possibleAssignedBlocks.length && (
+                <p>
+                  Possible matches:{" "}
+                  {possibleAssignedBlocks
+                    .map((blockRef) =>
+                      getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")
+                    )
+                    .join(", ")}
+                </p>
               )}
               {missingPrerequisites && (
                 <p>

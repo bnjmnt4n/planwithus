@@ -60,8 +60,10 @@ export const getBlockName = (
     blockSegments = blockSegments.flatMap((segment) => segment.split("/"));
 
     const blockIdPossibilities = blockSegments.map((_, index) => {
-      const slice = blockSegments.length - index - 1;
-      return [blockSegments.slice(0, slice).join("/"), lastSegment];
+      return [
+        blockSegments.slice(index, -1).join("/"),
+        blockSegments[blockSegments.length - 1],
+      ];
     });
 
     for (const [prefix, blockId] of blockIdPossibilities) {
@@ -84,6 +86,42 @@ export const getBlockName = (
   }
 
   return blockName;
+};
+
+// Hack to get a block from any directory since modules don't know which
+// directory they are in.
+export const getBlockNameFromAnyDirectory = (blockRef: string): string => {
+  for (const directory of Object.keys(DIRECTORIES)) {
+    try {
+      return getBlockName(directory, blockRef, "") || "(Unnamed)";
+    } catch (e) {
+      continue;
+    }
+  }
+
+  throw new Error(`Unable to get block name for block ref ${blockRef}`);
+};
+
+export const getBreadCrumbTrailFromAnyDirectory = (
+  blockRef: string
+): string[] => {
+  blockRef = blockRef.replace(/\/match(\/\d+)?$/g, "");
+  let blockSegments = blockRef.split(/\/(assign|match|satisfy)\//g);
+  blockSegments = blockSegments.flatMap((segment) => segment.split("/"));
+
+  const breadCrumbs = [];
+  let { length } = blockSegments;
+  while (length--) {
+    if (length === 0 || blockSegments[length - 1] === "assign") {
+      continue;
+    }
+
+    breadCrumbs.unshift(
+      getBlockNameFromAnyDirectory(blockSegments.slice(0, length).join("/"))
+    );
+  }
+
+  return breadCrumbs;
 };
 
 export type CheckedPlanResult = {
