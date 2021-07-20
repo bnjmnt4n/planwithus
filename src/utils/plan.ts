@@ -68,6 +68,11 @@ export const checkPlan = (
     return module;
   };
 
+  const addAssignedBlockToModule = (moduleCode: string, blockRef: string) => {
+    const module = getModule(moduleCode);
+    (module.assignedBlock || (module.assignedBlock = [])).push(blockRef);
+  };
+
   const recurse = (result: SatisfierResult, moduleMapList: ModuleMap[]) => {
     const parentRef = result.ref;
     const moduleMapObject = {
@@ -96,21 +101,22 @@ export const checkPlan = (
 
           const block = result.context as SatisfierResult;
           block.added.forEach(([moduleCode]) => {
-            const module = getModule(moduleCode);
-            (module.assignedBlock || (module.assignedBlock = [])).push(
-              block.ref
-            );
+            addAssignedBlockToModule(moduleCode, block.ref);
           });
           recurse(block, moduleMapObject.children);
         });
       } else if (isMatchBlock(result)) {
-        // TODO: single match result?
+        // TODO: single match result? is this accurate?
         if (!result.results.length) {
           // Do not show satisfy warnings if any block does not have modules assigned.
           // We make this assumption to reduce the number of warnings displayed.
           if (!result.added.length) {
             moduleMapObject.showSatisfiedWarnings = false;
           }
+
+          result.added.forEach(([moduleCode]) => {
+            addAssignedBlockToModule(moduleCode, result.ref);
+          });
         }
 
         result.results.forEach((block) => {
@@ -121,32 +127,28 @@ export const checkPlan = (
           }
 
           block.added.forEach(([moduleCode]) => {
-            const module = getModule(moduleCode);
-            (module.assignedBlock || (module.assignedBlock = [])).push(
-              block.ref
-            );
+            addAssignedBlockToModule(moduleCode, block.ref);
           });
           recurse(block, moduleMapObject.children);
         });
       } else if (isSatisfyBlock(result)) {
-        // Only show satisfy warnings for blocks with assigned modules to avoid showing too many warnings.
-        if (!moduleMapObject.showSatisfiedWarnings) {
-          // TODO: show MC warnings
-          return;
+        // TODO: is this necessary?
+        if (!result.results.length) {
+          // TODO
         }
 
-        if (result.isSatisfied) {
-          // TODO
-          return;
-        } else {
-          result.results.forEach((result) => {
-            if (!result.context) return;
-            recurse(
-              result.context as SatisfierResult,
-              moduleMapObject.children
-            );
-          });
-        }
+        result.results.forEach((result) => {
+          const block = (result.context as SatisfierResult) || result;
+          // Only show satisfy warnings for blocks with assigned modules to avoid showing too many warnings.
+          if (
+            !moduleMapObject.showSatisfiedWarnings &&
+            !isSatisfyMcBlock(block)
+          ) {
+            return;
+          }
+
+          recurse(block, moduleMapObject.children);
+        });
       }
     });
   };
@@ -187,3 +189,5 @@ const isAssignBlock = (result: SatisfierResult) =>
 const isMatchBlock = (result: SatisfierResult) => result.ref.endsWith("/match");
 const isSatisfyBlock = (result: SatisfierResult) =>
   result.ref.endsWith("/satisfy");
+const isSatisfyMcBlock = (result: SatisfierResult) =>
+  result.ref.endsWith("/mc");
