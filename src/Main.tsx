@@ -144,7 +144,6 @@ export const Main = (): JSX.Element => {
                 {...provided.droppableProps}
               >
                 <h1>{isDragging ? "Drop to remove" : "plaNwithUS"}</h1>
-                {provided.placeholder}
               </header>
             )}
           </Droppable>
@@ -166,7 +165,13 @@ export const Main = (): JSX.Element => {
                 itemToString={(block) => getTopLevelBlockName(block)}
                 onItemSelected={(block) => setBlock(block)}
               />
-              <p>{info.join("\n")}</p>
+              <p>
+                <ul>
+                  {info.map((item, index) => (
+                    <li key={`${item}-${index}`}>{item}</li>
+                  ))}
+                </ul>
+              </p>
               <CheckedPlanItem
                 key={checkedPlanResult.ref}
                 checkedPlanResult={checkedPlanResult}
