@@ -43,7 +43,7 @@ export const ModuleMap = ({
           </button>
         )}
         <p style={{ fontFamily: "Iosevka, monospace" }}>
-          <strong>Assigned blocks: </strong>
+          <strong>Assigned modules: </strong>
           {module.assigned}
           <br />
           {module.message && (
