@@ -52,7 +52,8 @@ export const Item = ({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={
+          className={[
+            classes.common,
             snapshot.isDragging
               ? classes.dragging
               : isCurrentModuleHighlighted
@@ -61,8 +62,8 @@ export const Item = ({
               ? classes.warning
               : isAssigned
               ? classes.assigned
-              : classes.idle
-          }
+              : classes.idle,
+          ].join(" ")}
           elevation={snapshot.isDragging ? 10 : 1}
         >
           <div
