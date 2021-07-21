@@ -18,7 +18,16 @@ export const CheckedPlanItem = ({
 } & React.HTMLProps<HTMLDivElement>): JSX.Element => {
   const { setHighlightedBlock } = useModuleContext();
 
-  const hasChildren = !!module.children.length;
+  // Hide match blocks and satisfy blocks which are satisfied.
+  // They are hidden here so they are still allowed to recurse in the results checks.
+  const visibleChildren = module.children.filter((result) => {
+    return (
+      result.type !== "match" &&
+      !(result.type === "satisfy" && result.satisfied)
+    );
+  });
+
+  const hasChildren = !!visibleChildren.length;
   const [isChildrenShown, setIsChildrenShown] = useState(false);
 
   const hasYaml = !!module.block;
@@ -111,7 +120,7 @@ export const CheckedPlanItem = ({
 
         {isChildrenShown && (
           <div>
-            {module.children.map((module) => (
+            {visibleChildren.map((module) => (
               <CheckedPlanItem key={module.ref} checkedPlanResult={module} />
             ))}
           </div>
