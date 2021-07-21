@@ -1,41 +1,28 @@
 import { useMemo, useState } from "react";
 import { useQueries, useQuery, UseQueryResult } from "react-query";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { Drawer, Grid, makeStyles, Typography } from "@material-ui/core";
+import { Grid, makeStyles, Typography } from "@material-ui/core";
 
 import { ModuleContextProvider } from "./ModuleContext";
-import { Combobox } from "./Combobox";
 import { Year } from "./Year";
 import { ModuleList } from "./ModuleList";
 import { AddModule } from "./AddModule";
-import { CheckedPlanItem } from "./CheckedPlanItem";
 import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
 import { move, removeModule, swapPosition } from "./utils/modules";
 import { checks } from "./utils/checks";
-import {
-  getTopLevelBlockAY,
-  getTopLevelBlockName,
-  getTopLevelBlocks,
-} from "./utils/plan";
+import { getTopLevelBlocks } from "./utils/plan";
+import { Drawer, DRAWER_WIDTH } from "./Drawer";
 
 import type { DropResult } from "react-beautiful-dnd";
 import type { ModuleCondensed, ModuleInformation } from "./types";
 
 export const YEARS = [1, 2, 3, 4, 5];
 
-const drawerWidth = 500;
 const useStyles = makeStyles((theme) => ({
   root: {
-    marginLeft: drawerWidth,
+    marginLeft: DRAWER_WIDTH,
     flexGrow: 1,
     padding: theme.spacing(3),
-  },
-  drawer: {
-    width: drawerWidth,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-    padding: 20,
   },
 }));
 
@@ -161,39 +148,13 @@ export const Main = (): JSX.Element => {
             )}
           </Droppable>
           <Drawer
-            className={classes.drawer}
-            classes={{
-              paper: classes.drawerPaper,
-            }}
-            variant="permanent"
-            anchor="left"
-          >
-            <p>
-              <strong>Selected block: </strong> {blockToString(block)}
-            </p>
-            <Combobox
-              items={topLevelBlocks}
-              label="Select a block"
-              placeholder="Block"
-              emptyText="No such block"
-              itemKey={(block, index) => `${block[0]}-${block[1]}-${index}`}
-              itemToString={blockToString}
-              onItemSelected={(block) => setBlock(block)}
-            />
-            <p>
-              <b>Info:</b>
-            </p>
-            <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
-              {info.map((item, index) => (
-                <li key={`${item}-${index}`}>{item}</li>
-              ))}
-            </ol>
-            <CheckedPlanItem
-              key={checkedPlanResult.ref}
-              checkedPlanResult={checkedPlanResult}
-              onMouseOut={() => setHighlightedBlock("")}
-            />
-          </Drawer>
+            info={info}
+            checkedPlanResult={checkedPlanResult}
+            topLevelBlocks={topLevelBlocks}
+            block={block}
+            setBlock={setBlock}
+            setHighlightedBlock={setHighlightedBlock}
+          />
           <Grid
             container
             direction="row"
@@ -219,10 +180,4 @@ export const Main = (): JSX.Element => {
       </DragDropContext>
     </ModuleContextProvider>
   );
-};
-
-const blockToString = (block: readonly [string, string]) => {
-  const name = getTopLevelBlockName(block);
-  const ay = getTopLevelBlockAY(block);
-  return ay === null ? name : `${name} (AY${ay % 100}/${(ay % 100) + 1})`;
 };
