@@ -18,6 +18,6 @@ export const useItemStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.success.light,
   },
   highlighted: {
-    backgroundColor: theme.palette.secondary.light,
+    backgroundColor: "#4dabf5",
   },
 }));
