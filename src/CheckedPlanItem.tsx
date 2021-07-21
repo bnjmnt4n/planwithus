@@ -59,7 +59,7 @@ export const CheckedPlanItem = ({
           <CloseIcon fontSize="small" style={{ color: red[500] }} />
         )}
       </div>
-      <div>
+      <div style={{ overflow: "hidden" }}>
         <div onMouseOver={() => setHighlightedBlock(module.ref)}>
           <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
             {module.name || module.ref}
@@ -106,7 +106,7 @@ export const CheckedPlanItem = ({
               </button>
             </p>
           )}
-          {isYamlShown && <pre>{blockYaml}</pre>}
+          {isYamlShown && <pre style={{ overflow: "auto" }}>{blockYaml}</pre>}
         </div>
 
         {isChildrenShown && (

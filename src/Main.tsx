@@ -147,7 +147,7 @@ export const Main = (): JSX.Element => {
       }}
     >
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        <div className="h-screen flex flex-col">
+        <div className="flex flex-col">
           <Droppable droppableId="remove">
             {/* TODO: highlighting when dragging over */}
             {(provided, _snapshot) => (
