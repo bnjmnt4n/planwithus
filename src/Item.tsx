@@ -104,30 +104,29 @@ export const Item = ({
               </p>
             )}
           </>
-          {displayWarnings && (
+          {displayWarnings && hasWarnings && (
             <>
-              {hasWarnings && <Divider style={{ margin: "8px 0" }} />}
-              <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
-                {!individualModuleInfo && (
-                  <li>
-                    <p>Loading module information...</p>
-                  </li>
-                )}
-                {duplicate && (
-                  <li>
-                    <p>Duplicate module</p>
-                  </li>
-                )}
-                {missingPrerequisites && (
-                  <li>
-                    <p>
-                      Missing prerequisites:
-                      <br />
-                      {printMissingPrerequisites(missingPrerequisites)}
-                    </p>
-                  </li>
-                )}
-              </ol>
+              <Divider style={{ margin: "8px 0" }} />
+              {!individualModuleInfo ? (
+                <p>Loading module information...</p>
+              ) : (
+                <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
+                  {duplicate && (
+                    <li>
+                      <p>Duplicate module</p>
+                    </li>
+                  )}
+                  {missingPrerequisites && (
+                    <li>
+                      <p>
+                        Missing prerequisites:
+                        <br />
+                        {printMissingPrerequisites(missingPrerequisites)}
+                      </p>
+                    </li>
+                  )}
+                </ol>
+              )}
             </>
           )}
         </Paper>
