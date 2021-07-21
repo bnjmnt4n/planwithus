@@ -25,6 +25,18 @@ export const getTopLevelBlockName = ([directory, blockId]: readonly [
   return block.name ?? "";
 };
 
+export const getTopLevelBlockAY = ([directory, blockId]: readonly [
+  string,
+  string
+]): number | null => {
+  const [, block] = DIRECTORIES[directory as keyof typeof DIRECTORIES].find(
+    "",
+    blockId
+  );
+
+  return block.ay ?? null;
+};
+
 const directoryBlockNameMap: Map<string, Map<string, string>> = new Map();
 export const getBlockName = (
   directory: string,

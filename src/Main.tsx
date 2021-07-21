@@ -12,7 +12,11 @@ import { CheckedPlanItem } from "./CheckedPlanItem";
 import { useUserSelectedModules } from "./hooks/useUserSelectedModules";
 import { move, removeModule, swapPosition } from "./utils/modules";
 import { checks } from "./utils/checks";
-import { getTopLevelBlockName, getTopLevelBlocks } from "./utils/plan";
+import {
+  getTopLevelBlockAY,
+  getTopLevelBlockName,
+  getTopLevelBlocks,
+} from "./utils/plan";
 
 import type { DropResult } from "react-beautiful-dnd";
 import type { ModuleCondensed, ModuleInformation } from "./types";
@@ -171,7 +175,13 @@ export const Main = (): JSX.Element => {
               placeholder="Block"
               emptyText="No such block"
               itemKey={(block, index) => `${block[0]}-${block[1]}-${index}`}
-              itemToString={(block) => getTopLevelBlockName(block)}
+              itemToString={(block) => {
+                const name = getTopLevelBlockName(block);
+                const ay = getTopLevelBlockAY(block);
+                return ay === null
+                  ? name
+                  : `${name} (AY${ay % 100}/${(ay % 100) + 1})`;
+              }}
               onItemSelected={(block) => setBlock(block)}
             />
             <p>
