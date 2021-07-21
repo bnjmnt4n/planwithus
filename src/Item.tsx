@@ -34,6 +34,11 @@ export const Item = ({
   const assignedBlock = module?.assignedBlock ?? "";
   const possibleAssignedBlocks = module?.possibleAssignedBlocks ?? [];
 
+  const hasWarnings = missingPrerequisites || duplicate;
+  const isAssigned = !(
+    assignedBlock === "" && possibleAssignedBlocks.length === 0
+  );
+
   const isCurrentModuleHighlighted =
     highlightedBlock &&
     [assignedBlock, ...possibleAssignedBlocks].some((block) =>
@@ -52,6 +57,10 @@ export const Item = ({
               ? classes.dragging
               : isCurrentModuleHighlighted
               ? classes.highlighted
+              : hasWarnings
+              ? classes.warning
+              : isAssigned
+              ? classes.assigned
               : classes.idle
           }
           elevation={snapshot.isDragging ? 10 : 1}
