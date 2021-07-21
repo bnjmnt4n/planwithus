@@ -58,18 +58,24 @@ export const getBlock = (directory: string, blockRef: string): Block | null => {
 
   let block = blockMap.get(blockRef);
   if (!block) {
-    let blockSegments = blockRef.split(
-      /\/(?:assign|match|satisfy(?:\/\d+(?!\/mc|\/or|\/and))?)\//g
-    );
-    const lastSegment = blockSegments[blockSegments.length - 1];
-
     // Remove all and/or/mc block refs since they won't have a name.
-    if (/^(\d+)(\/or|\/mc|\/and)?$/.test(lastSegment)) {
+    if (/\/\d+(\/or|\/mc|\/and)?$/.test(blockRef)) {
       block = null;
       blockMap.set(blockRef, block);
       return block;
     }
-    blockSegments = blockSegments.flatMap((segment) => segment.split("/"));
+
+    let blockSegments = blockRef.split(/\/(?:assign|match|satisfy)\//g);
+    blockSegments = blockSegments.flatMap((segment) => {
+      // Remove all `/0/and/0` at the front, so we can get the blocks.
+      const segments = segment.split("/");
+      for (let i = 0; i < segments.length; i++) {
+        if (!/^(\d+|or|and)$/.test(segments[i])) {
+          return segments.slice(i);
+        }
+      }
+      return [];
+    });
 
     let prefix = "";
     block = null;
@@ -98,22 +104,22 @@ export const getBlockName = (directory: string, blockRef: string): string => {
   const block = getBlock(directory, blockRef);
 
   if (!block) {
-    const blockSegments = blockRef.split(
-      /\/(?:assign|match|satisfy(?:\/\d+(?!\/mc|\/or|\/and))?)\//g
-    );
-    const lastSegment = blockSegments[blockSegments.length - 1];
-
+    let match;
+    let partialBlockRef = blockRef;
     // Name refs after their specific type.
-    if (/^(\d+)(\/or|\/mc|\/and)?$/.test(lastSegment)) {
-      const segments = blockRef.slice(0, -lastSegment.length - 1).split("/");
-      const ruleType = segments[segments.length - 1];
+    while ((match = /\/(\d+)(\/or|\/mc|\/and)?$/.exec(partialBlockRef))) {
+      partialBlockRef = partialBlockRef.slice(0, -match[0].length);
+    }
+
+    if ((match = /\/(match|satisfy)$/.exec(partialBlockRef))) {
+      const ruleType = match[1];
       return `${ruleType.charAt(0).toUpperCase()}${ruleType.slice(1)} rule`;
     }
 
-    return "";
+    return "(Unnamed)";
   }
 
-  return block.name ?? "";
+  return block.name ?? "(Unnamed)";
 };
 
 // Hack to get a block from any directory since modules don't know which
@@ -133,17 +139,16 @@ export const getBlockNameFromAnyDirectory = (blockRef: string): string => {
 export const getBreadCrumbTrailFromAnyDirectory = (
   blockRef: string
 ): string[] => {
+  // Assignments must always end with matches.
+  // TODO: more robust
   blockRef = blockRef.replace(/\/match(\/\d+(\/or|\/and)?)?$/g, "");
-  let blockSegments = blockRef.split(/\/(assign|match|satisfy)\//g);
+  // They can only contain assigns.
+  let blockSegments = blockRef.split(/\/assign\//g);
   blockSegments = blockSegments.flatMap((segment) => segment.split("/"));
 
   const breadCrumbs = [];
   let { length } = blockSegments;
   while (length--) {
-    if (blockSegments[length] === "assign") {
-      continue;
-    }
-
     breadCrumbs.unshift(
       getBlockNameFromAnyDirectory(blockSegments.slice(0, length + 1).join("/"))
     );
@@ -270,6 +275,10 @@ export const checkPlan = (
 
           recurse(block, checkedPlanResult.children, "assign");
           block.added.forEach(([moduleCode]) => {
+            // TODO: don't allow satisfy blocks to assign.
+            if (/\/satisfy(\/|$)/.test(currentRef)) {
+              return;
+            }
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
               checkedPlanResult.possibleAssignments++;
@@ -289,6 +298,10 @@ export const checkPlan = (
           }
 
           result.added.forEach(([moduleCode]) => {
+            // TODO: don't allow satisfy blocks to assign.
+            if (/\/satisfy(\/|$)/.test(currentRef)) {
+              return;
+            }
             addPossibleAssignedBlockToModule(moduleCode, result.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
               checkedPlanResult.possibleAssignments++;
@@ -305,6 +318,10 @@ export const checkPlan = (
 
           recurse(block, checkedPlanResult.children, "match");
           block.added.forEach(([moduleCode]) => {
+            // TODO: don't allow satisfy blocks to assign.
+            if (/\/satisfy(\/|$)/.test(currentRef)) {
+              return;
+            }
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
               checkedPlanResult.possibleAssignments++;
