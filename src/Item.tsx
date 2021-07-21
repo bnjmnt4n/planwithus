@@ -1,5 +1,5 @@
 import { Draggable } from "react-beautiful-dnd";
-import { IconButton, Paper } from "@material-ui/core";
+import { Divider, IconButton, List, Paper } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import { useItemStyles } from "./listStyles";
@@ -34,7 +34,8 @@ export const Item = ({
   const assignedBlock = module?.assignedBlock ?? "";
   const possibleAssignedBlocks = module?.possibleAssignedBlocks ?? [];
 
-  const hasWarnings = missingPrerequisites || duplicate;
+  const hasWarnings =
+    !individualModuleInfo || missingPrerequisites || duplicate;
   const isAssigned = !(
     assignedBlock === "" && possibleAssignedBlocks.length === 0
   );
@@ -80,35 +81,48 @@ export const Item = ({
               <DeleteIcon />
             </IconButton>
           </div>
+          <>
+            {assignedBlock && (
+              <p>
+                Assigned to block:{" "}
+                {getBreadCrumbTrailFromAnyDirectory(assignedBlock).join(" > ")}
+              </p>
+            )}
+            {!!possibleAssignedBlocks.length && (
+              <p>
+                Possible matches:{" "}
+                {possibleAssignedBlocks
+                  .map((blockRef) =>
+                    getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")
+                  )
+                  .join(", ")}
+              </p>
+            )}
+          </>
           {displayWarnings && (
             <>
-              {!individualModuleInfo && <p>Loading module information...</p>}
-              {duplicate && <p>Duplicate module</p>}
-              {assignedBlock && (
-                <p>
-                  Assigned to block:{" "}
-                  {getBreadCrumbTrailFromAnyDirectory(assignedBlock).join(
-                    " > "
-                  )}
-                </p>
-              )}
-              {!!possibleAssignedBlocks.length && (
-                <p>
-                  Possible matches:{" "}
-                  {possibleAssignedBlocks
-                    .map((blockRef) =>
-                      getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")
-                    )
-                    .join(", ")}
-                </p>
-              )}
-              {missingPrerequisites && (
-                <p>
-                  Missing prerequisites:
-                  <br />
-                  {printMissingPrerequisites(missingPrerequisites)}
-                </p>
-              )}
+              {hasWarnings && <Divider style={{ margin: "8px 0" }} />}
+              <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
+                {!individualModuleInfo && (
+                  <li>
+                    <p>Loading module information...</p>
+                  </li>
+                )}
+                {duplicate && (
+                  <li>
+                    <p>Duplicate module</p>
+                  </li>
+                )}
+                {missingPrerequisites && (
+                  <li>
+                    <p>
+                      Missing prerequisites:
+                      <br />
+                      {printMissingPrerequisites(missingPrerequisites)}
+                    </p>
+                  </li>
+                )}
+              </ol>
             </>
           )}
         </Paper>
