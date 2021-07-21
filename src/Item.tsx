@@ -34,6 +34,9 @@ export const Item = ({
   const assignedBlock = module?.assignedBlock ?? "";
   const possibleAssignedBlocks = module?.possibleAssignedBlocks ?? [];
 
+  const moduleCreditStr = individualModuleInfo?.moduleCredit;
+  const moduleCredit = moduleCreditStr ? parseInt(moduleCreditStr) : null;
+
   const hasWarnings =
     !individualModuleInfo || missingPrerequisites || duplicate;
   const isAssigned = !(
@@ -85,20 +88,22 @@ export const Item = ({
             </IconButton>
           </div>
           <>
+            {moduleCredit && <p>{moduleCredit} MCs</p>}
             {assignedBlock && (
-              <p>
-                Assigned to block:{" "}
+              <p style={{ fontSize: "90%" }}>
                 {getBreadCrumbTrailFromAnyDirectory(assignedBlock).join(" > ")}
               </p>
             )}
             {!!possibleAssignedBlocks.length && (
-              <p>
-                Possible matches:{" "}
-                {possibleAssignedBlocks
-                  .map((blockRef) =>
-                    getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")
-                  )
-                  .join(", ")}
+              <p style={{ fontSize: "90%" }}>
+                Possible matches:
+                <ul style={{ listStyle: "decimal", padding: "0 16px" }}>
+                  {possibleAssignedBlocks.map((blockRef) => (
+                    <li>
+                      {getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")}
+                    </li>
+                  ))}
+                </ul>
               </p>
             )}
           </>
