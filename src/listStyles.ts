@@ -5,6 +5,7 @@ export const useItemStyles = makeStyles((theme) => ({
     userSelect: "none",
     padding: theme.spacing(2),
     margin: `${theme.spacing(1)}px 0`,
+    fontSize: "0.9rem",
   },
   blank: {
     backgroundColor: theme.palette.action.disabled,

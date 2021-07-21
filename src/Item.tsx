@@ -78,7 +78,11 @@ export const Item = ({
               {module.code}
               {itemInfo && ` ${itemInfo.title}`}
             </b>
-            <IconButton aria-label="delete" onClick={onRemove}>
+            <IconButton
+              aria-label="delete"
+              onClick={onRemove}
+              style={{ fontSize: "1.3rem" }}
+            >
               <DeleteIcon />
             </IconButton>
           </div>
