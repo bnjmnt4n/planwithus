@@ -33,7 +33,7 @@ export const ModuleList = ({
       {(provided, snapshot) => (
         <Grid
           container
-          spacing={2}
+          spacing={1}
           ref={provided.innerRef}
           className={
             snapshot.isDraggingOver ? classes.isDraggingOver : classes.idle
