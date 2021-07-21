@@ -1,7 +1,7 @@
 import { initDirectories, verifyPlan } from "planwithus-lib";
 import { Module } from "../types";
 
-import type { SatisfierResult } from "planwithus-lib";
+import type { Block, SatisfierResult } from "planwithus-lib";
 
 const DIRECTORIES = initDirectories();
 
@@ -37,21 +37,27 @@ export const getTopLevelBlockAY = ([directory, blockId]: readonly [
   return block.ay ?? null;
 };
 
-const directoryBlockNameMap: Map<string, Map<string, string>> = new Map();
-export const getBlockName = (
-  directory: string,
-  blockRef: string,
-  // TODO: simplify using this?
-  _parentBlockRef: string
-): string => {
-  let blockNameMap = directoryBlockNameMap.get(directory);
-  if (!blockNameMap) {
-    blockNameMap = new Map();
-    directoryBlockNameMap.set(directory, blockNameMap);
+const cleanBlock = (
+  block: Block | null
+): Pick<Block, "assign" | "match" | "satisfy"> | null => {
+  if (!block) {
+    return null;
+  }
+  const { assign, match, satisfy } = block;
+  return { assign, match, satisfy };
+};
+
+const directoryBlockMap: Map<string, Map<string, Block | null>> = new Map();
+export const getBlock = (directory: string, blockRef: string): Block | null => {
+  let blockMap: Map<string, Block | null> | undefined =
+    directoryBlockMap.get(directory);
+  if (!blockMap) {
+    blockMap = new Map();
+    directoryBlockMap.set(directory, blockMap);
   }
 
-  let blockName = blockNameMap.get(blockRef);
-  if (!blockName) {
+  let block = blockMap.get(blockRef);
+  if (!block) {
     let blockSegments = blockRef.split(
       /\/(?:assign|match|satisfy(?:\/\d+(?!\/mc|\/or|\/and))?)\//g
     );
@@ -59,47 +65,55 @@ export const getBlockName = (
 
     // Remove all and/or/mc block refs since they won't have a name.
     if (/^(\d+)(\/or|\/mc|\/and)?$/.test(lastSegment)) {
-      const segments = blockRef.slice(0, -lastSegment.length - 1).split("/");
-      const parentName = getBlockName(
-        directory,
-        segments.slice(0, -1).join("/"),
-        ""
-      );
-      const ruleType = segments[segments.length - 1];
-      blockName = `${parentName ? parentName + " " : ""}${ruleType} rule`;
-
-      blockNameMap.set(blockRef, blockName);
-      return blockName;
+      block = null;
+      blockMap.set(blockRef, block);
+      return block;
     }
     blockSegments = blockSegments.flatMap((segment) => segment.split("/"));
 
-    const blockIdPossibilities = blockSegments.map((_, index) => {
-      return [
-        blockSegments.slice(index, -1).join("/"),
-        blockSegments[blockSegments.length - 1],
-      ];
-    });
-
-    for (const [prefix, blockId] of blockIdPossibilities) {
+    let prefix = "";
+    block = null;
+    for (const subString of blockSegments) {
       try {
-        const [, block] = DIRECTORIES[
+        [prefix, block] = DIRECTORIES[
           directory as keyof typeof DIRECTORIES
-        ].find(prefix, blockId);
+        ].find(prefix, subString);
 
-        blockName = block.name ?? "";
-        if (blockName) {
+        if (block) {
           continue;
         }
       } catch (e) {
-        continue;
+        break;
       }
     }
 
-    blockName || (blockName = "");
-    blockNameMap.set(blockRef, blockName);
+    block || (block = null);
+    blockMap.set(blockRef, block);
   }
 
-  return blockName;
+  return block;
+};
+
+export const getBlockName = (directory: string, blockRef: string): string => {
+  const block = getBlock(directory, blockRef);
+
+  if (!block) {
+    const blockSegments = blockRef.split(
+      /\/(?:assign|match|satisfy(?:\/\d+(?!\/mc|\/or|\/and))?)\//g
+    );
+    const lastSegment = blockSegments[blockSegments.length - 1];
+
+    // Name refs after their specific type.
+    if (/^(\d+)(\/or|\/mc|\/and)?$/.test(lastSegment)) {
+      const segments = blockRef.slice(0, -lastSegment.length - 1).split("/");
+      const ruleType = segments[segments.length - 1];
+      return `${ruleType.charAt(0).toUpperCase()}${ruleType.slice(1)} rule`;
+    }
+
+    return "";
+  }
+
+  return block.name ?? "";
 };
 
 // Hack to get a block from any directory since modules don't know which
@@ -107,7 +121,7 @@ export const getBlockName = (
 export const getBlockNameFromAnyDirectory = (blockRef: string): string => {
   for (const directory of Object.keys(DIRECTORIES)) {
     try {
-      return getBlockName(directory, blockRef, "") || "(Unnamed)";
+      return getBlockName(directory, blockRef) || "(Unnamed)";
     } catch (e) {
       continue;
     }
@@ -140,7 +154,8 @@ export const getBreadCrumbTrailFromAnyDirectory = (
 
 export type CheckedPlanResult = {
   ref: string;
-  name?: string;
+  block: Block | null;
+  name: string;
   assigned: number;
   possibleAssignments: number;
   showSatisfiedWarnings: boolean;
@@ -210,15 +225,14 @@ export const checkPlan = (
   const recurse = (
     result: SatisfierResult,
     checkedPlanResultList: CheckedPlanResult[],
-    // TODO: make use of this to get the block
-    parentRef: string,
     isTopLevel = false
   ) => {
     const currentRef = result.ref;
     const mainResult = result;
-    const checkedPlanResult = {
+    const checkedPlanResult: CheckedPlanResult = {
       ref: currentRef,
-      name: getBlockName(directory, currentRef, parentRef),
+      block: cleanBlock(getBlock(directory, currentRef)),
+      name: getBlockName(directory, currentRef),
       assigned: result.added.length,
       possibleAssignments: 0,
       showSatisfiedWarnings: true,
@@ -245,7 +259,7 @@ export const checkPlan = (
           }
 
           const block = result.context as SatisfierResult;
-          recurse(block, checkedPlanResult.children, currentRef);
+          recurse(block, checkedPlanResult.children);
           block.added.forEach(([moduleCode]) => {
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
@@ -280,7 +294,7 @@ export const checkPlan = (
             checkedPlanResult.showSatisfiedWarnings = false;
           }
 
-          recurse(block, checkedPlanResult.children, currentRef);
+          recurse(block, checkedPlanResult.children);
           block.added.forEach(([moduleCode]) => {
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
@@ -306,7 +320,7 @@ export const checkPlan = (
             return;
           }
 
-          recurse(block, checkedPlanResult.children, currentRef);
+          recurse(block, checkedPlanResult.children);
         });
       }
     });
@@ -336,7 +350,7 @@ export const checkPlan = (
   };
 
   const checkedPlanResultList: CheckedPlanResult[] = [];
-  recurse(checkedPlan, checkedPlanResultList, "", true);
+  recurse(checkedPlan, checkedPlanResultList, true);
 
   return {
     results: modules,

@@ -3,6 +3,7 @@ import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import { green, red } from "@material-ui/core/colors";
 import { useModuleContext } from "./ModuleContext";
+import { displayYaml } from "./utils/yaml";
 
 import type { CheckedPlanResult } from "./utils/plan";
 
@@ -16,6 +17,10 @@ export const CheckedPlanItem = ({
 
   const hasChildren = !!module.children.length;
   const [isChildrenShown, setIsChildrenShown] = useState(false);
+
+  const hasYaml = !!module.block;
+  const blockYaml = module.block ? displayYaml(module.block) : null;
+  const [isYamlShown, setIsYamlShown] = useState(false);
 
   return (
     <div
@@ -33,14 +38,17 @@ export const CheckedPlanItem = ({
           )}{" "}
           {module.name || module.ref}
         </h2>
+
         {hasChildren && (
-          <button
-            onClick={() =>
-              setIsChildrenShown((isChildrenShown) => !isChildrenShown)
-            }
-          >
-            {isChildrenShown ? "Close" : "Expand"}
-          </button>
+          <p>
+            <button
+              onClick={() =>
+                setIsChildrenShown((isChildrenShown) => !isChildrenShown)
+              }
+            >
+              {isChildrenShown ? "Close" : "Expand"}
+            </button>
+          </p>
         )}
         <p style={{ fontFamily: "Iosevka, monospace" }}>
           <strong>Assigned modules: </strong>
@@ -68,6 +76,21 @@ export const CheckedPlanItem = ({
             </>
           )}
         </p>
+        {hasYaml && (
+          <p>
+            <button
+              onClick={() => setIsYamlShown((isYamlShown) => !isYamlShown)}
+            >
+              {isYamlShown ? "Hide schema" : "Display schema"}
+            </button>
+          </p>
+        )}
+        {isYamlShown && (
+          <>
+            <strong>Schema: </strong>
+            <pre>{blockYaml}</pre>
+          </>
+        )}
       </div>
 
       {isChildrenShown && (
