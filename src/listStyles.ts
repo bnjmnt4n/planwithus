@@ -6,19 +6,19 @@ export const useItemStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     margin: `${theme.spacing(1)}px 0`,
   },
+  blank: {
+    backgroundColor: theme.palette.action.disabled,
+  },
   idle: {
     backgroundColor: theme.palette.primary.light,
   },
   highlighted: {
-    backgroundColor: theme.palette.info.light,
+    backgroundColor: theme.palette.secondary.light,
   },
   warning: {
     backgroundColor: theme.palette.warning.light,
   },
   assigned: {
     backgroundColor: theme.palette.success.light,
-  },
-  dragging: {
-    backgroundColor: theme.palette.primary.light,
   },
 }));

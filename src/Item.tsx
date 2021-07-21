@@ -1,5 +1,5 @@
 import { Draggable } from "react-beautiful-dnd";
-import { Divider, IconButton, List, Paper } from "@material-ui/core";
+import { Divider, IconButton, Paper } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import { useItemStyles } from "./listStyles";
@@ -40,8 +40,9 @@ export const Item = ({
     assignedBlock === "" && possibleAssignedBlocks.length === 0
   );
 
+  const isSomeModuleHighlighted = !!highlightedBlock;
   const isCurrentModuleHighlighted =
-    highlightedBlock &&
+    isSomeModuleHighlighted &&
     [assignedBlock, ...possibleAssignedBlocks].some((block) =>
       block.startsWith(highlightedBlock)
     );
@@ -55,10 +56,10 @@ export const Item = ({
           {...provided.dragHandleProps}
           className={[
             classes.common,
-            snapshot.isDragging
-              ? classes.dragging
-              : isCurrentModuleHighlighted
-              ? classes.highlighted
+            isSomeModuleHighlighted
+              ? isCurrentModuleHighlighted
+                ? classes.highlighted
+                : classes.blank
               : hasWarnings
               ? classes.warning
               : isAssigned
