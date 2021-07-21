@@ -15,6 +15,9 @@ export const useItemStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.warning.light,
   },
   assigned: {
-    backgroundColor: theme.palette.primary.light,
+    backgroundColor: theme.palette.success.light,
+  },
+  highlighted: {
+    backgroundColor: theme.palette.secondary.light,
   },
 }));

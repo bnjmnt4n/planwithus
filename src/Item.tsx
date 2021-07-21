@@ -59,8 +59,10 @@ export const Item = ({
           {...provided.dragHandleProps}
           className={[
             classes.common,
-            isSomeModuleHighlighted && !isCurrentModuleHighlighted
-              ? classes.blank
+            isSomeModuleHighlighted
+              ? isCurrentModuleHighlighted
+                ? classes.highlighted
+                : classes.blank
               : hasWarnings
               ? classes.warning
               : isAssigned
