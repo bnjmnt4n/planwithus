@@ -175,11 +175,12 @@ export const Main = (): JSX.Element => {
               onItemSelected={(block) => setBlock(block)}
             />
             <p>
-              <ul>
+              <b>Info:</b>
+              <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
                 {info.map((item, index) => (
                   <li key={`${item}-${index}`}>{item}</li>
                 ))}
-              </ul>
+              </ol>
             </p>
             <CheckedPlanItem
               key={checkedPlanResult.ref}
