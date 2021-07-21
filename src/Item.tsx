@@ -71,7 +71,7 @@ export const Item = ({
           <div
             style={{
               display: "flex",
-              justifyContent: "space-around",
+              justifyContent: "space-between",
             }}
           >
             <b>

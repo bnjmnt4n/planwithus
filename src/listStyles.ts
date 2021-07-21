@@ -6,6 +6,7 @@ export const useItemStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     margin: `${theme.spacing(1)}px 0`,
     fontSize: "0.9rem",
+    width: "100%",
   },
   blank: {
     backgroundColor: theme.palette.action.disabled,
