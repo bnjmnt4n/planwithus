@@ -11,7 +11,7 @@ export const displayYaml = (
         if (!value) {
           return "";
         }
-        return dump({ [name]: value });
+        return dump({ [name]: value }).trim();
       }
       return "";
     })

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
+import RemoveIcon from "@material-ui/icons/Remove";
+import KeyboardArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { green, red } from "@material-ui/core/colors";
 import { useModuleContext } from "./ModuleContext";
 import { displayYaml } from "./utils/yaml";
@@ -27,85 +30,93 @@ export const CheckedPlanItem = ({
   return (
     <div
       style={{
-        margin: "10px 0",
+        display: "flex",
+        padding: "10px 0",
       }}
       {...props}
     >
-      <div onMouseOver={() => setHighlightedBlock(module.ref)}>
-        <h2 style={{ fontWeight: "bold" }}>
-          {module.satisfied ? (
-            <CheckIcon style={{ color: green[500] }} />
-          ) : (
-            <CloseIcon style={{ color: red[500] }} />
-          )}{" "}
-          {module.name || module.ref}
-        </h2>
-
-        {hasChildren && (
-          <p>
-            <button
-              onClick={() =>
-                setIsChildrenShown((isChildrenShown) => !isChildrenShown)
-              }
-            >
-              {isChildrenShown ? "Close" : "Expand"}
-            </button>
-          </p>
-        )}
-        <p style={{ fontFamily: "Iosevka, monospace" }}>
-          {showAssignedModules && (
-            <>
-              <strong>Assigned modules: </strong>
-              {module.assigned}
-              <br />
-            </>
-          )}
-          {!!module.possibleAssignments && (
-            <>
-              <strong>Possible matches: </strong>
-              {module.possibleAssignments}
-              <br />
-            </>
-          )}
-          {module.message && (
-            <>
-              <strong>Message: </strong>
-              {module.message}
-              <br />
-            </>
-          )}
-          {module.info && (
-            <>
-              <strong>Info: </strong>
-              {module.info}
-              <br />
-            </>
-          )}
-        </p>
-        {hasYaml && (
-          <p>
-            <button
-              onClick={() => setIsYamlShown((isYamlShown) => !isYamlShown)}
-            >
-              {isYamlShown ? "Hide schema" : "Display schema"}
-            </button>
-          </p>
-        )}
-        {isYamlShown && (
-          <>
-            <strong>Schema: </strong>
-            <pre>{blockYaml}</pre>
-          </>
+      <div>
+        {hasChildren ? (
+          <button
+            onClick={() =>
+              setIsChildrenShown((isChildrenShown) => !isChildrenShown)
+            }
+          >
+            {isChildrenShown ? (
+              <KeyboardArrowDownIcon fontSize="small" />
+            ) : (
+              <KeyboardArrowRightIcon fontSize="small" />
+            )}
+          </button>
+        ) : (
+          <RemoveIcon fontSize="small" />
         )}
       </div>
+      <div style={{ paddingRight: "8px" }}>
+        {module.satisfied ? (
+          <CheckIcon fontSize="small" style={{ color: green[500] }} />
+        ) : (
+          <CloseIcon fontSize="small" style={{ color: red[500] }} />
+        )}
+      </div>
+      <div>
+        <div onMouseOver={() => setHighlightedBlock(module.ref)}>
+          <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
+            {module.name || module.ref}
+          </h2>
 
-      {isChildrenShown && (
-        <div style={{ marginLeft: 20 }}>
-          {module.children.map((module) => (
-            <CheckedPlanItem key={module.ref} checkedPlanResult={module} />
-          ))}
+          <p>
+            {showAssignedModules && (
+              <>
+                <strong>Assigned modules: </strong>
+                {module.assigned}
+                <br />
+              </>
+            )}
+            {!!module.possibleAssignments && (
+              <>
+                <strong>Possible matches: </strong>
+                {module.possibleAssignments}
+                <br />
+              </>
+            )}
+            {module.message && (
+              <>
+                <strong>Message: </strong>
+                {module.message}
+                <br />
+              </>
+            )}
+            {module.info && (
+              <>
+                <strong>Info: </strong>
+                {module.info}
+                <br />
+              </>
+            )}
+          </p>
+          {hasYaml && (
+            <p>
+              <button
+                onClick={() => setIsYamlShown((isYamlShown) => !isYamlShown)}
+              >
+                <strong>
+                  {isYamlShown ? "Hide schema" : "Display schema"}
+                </strong>
+              </button>
+            </p>
+          )}
+          {isYamlShown && <pre>{blockYaml}</pre>}
         </div>
-      )}
+
+        {isChildrenShown && (
+          <div>
+            {module.children.map((module) => (
+              <CheckedPlanItem key={module.ref} checkedPlanResult={module} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
