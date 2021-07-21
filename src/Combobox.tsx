@@ -91,7 +91,7 @@ export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
   return (
     <div className="w-full">
       <FormLabel {...getLabelProps()}>{label}</FormLabel>
-      <div {...getComboboxProps()}>
+      <div {...getComboboxProps()} style={{ display: "flex" }}>
         <Input
           placeholder={placeholder}
           {...getInputProps({
@@ -103,6 +103,9 @@ export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
               }
             },
           })}
+          style={{
+            flexGrow: 1,
+          }}
         />
         <IconButton color="secondary" {...getToggleButtonProps()}>
           <ExpandMoreIcon />
