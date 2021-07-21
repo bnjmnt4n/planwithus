@@ -133,7 +133,7 @@ export const getBlockNameFromAnyDirectory = (blockRef: string): string => {
 export const getBreadCrumbTrailFromAnyDirectory = (
   blockRef: string
 ): string[] => {
-  blockRef = blockRef.replace(/\/match(\/\d+)?$/g, "");
+  blockRef = blockRef.replace(/\/match(\/\d+(\/or|\/and)?)?$/g, "");
   let blockSegments = blockRef.split(/\/(assign|match|satisfy)\//g);
   blockSegments = blockSegments.flatMap((segment) => segment.split("/"));
 
