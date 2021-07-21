@@ -186,12 +186,12 @@ export const Main = (): JSX.Element => {
             />
             <p>
               <b>Info:</b>
-              <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
-                {info.map((item, index) => (
-                  <li key={`${item}-${index}`}>{item}</li>
-                ))}
-              </ol>
             </p>
+            <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
+              {info.map((item, index) => (
+                <li key={`${item}-${index}`}>{item}</li>
+              ))}
+            </ol>
             <CheckedPlanItem
               key={checkedPlanResult.ref}
               checkedPlanResult={checkedPlanResult}

@@ -97,16 +97,22 @@ export const Item = ({
               </p>
             )}
             {!!possibleAssignedBlocks.length && (
-              <p style={{ fontSize: "90%" }}>
-                Possible matches:
-                <ul style={{ listStyle: "decimal", padding: "0 16px" }}>
+              <>
+                <p style={{ fontSize: "90%" }}>Possible matches:</p>
+                <ul
+                  style={{
+                    fontSize: "90%",
+                    listStyle: "decimal",
+                    padding: "0 16px",
+                  }}
+                >
                   {possibleAssignedBlocks.map((blockRef) => (
-                    <li>
+                    <li key={blockRef}>
                       {getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")}
                     </li>
                   ))}
                 </ul>
-              </p>
+              </>
             )}
           </>
           {displayWarnings && hasWarnings && (
