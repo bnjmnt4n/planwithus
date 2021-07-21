@@ -22,6 +22,8 @@ export const CheckedPlanItem = ({
   const blockYaml = module.block ? displayYaml(module.block) : null;
   const [isYamlShown, setIsYamlShown] = useState(false);
 
+  const showAssignedModules = module.type !== "satisfy";
+
   return (
     <div
       style={{
@@ -51,9 +53,13 @@ export const CheckedPlanItem = ({
           </p>
         )}
         <p style={{ fontFamily: "Iosevka, monospace" }}>
-          <strong>Assigned modules: </strong>
-          {module.assigned}
-          <br />
+          {showAssignedModules && (
+            <>
+              <strong>Assigned modules: </strong>
+              {module.assigned}
+              <br />
+            </>
+          )}
           {!!module.possibleAssignments && (
             <>
               <strong>Possible matches: </strong>

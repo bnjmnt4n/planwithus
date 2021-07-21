@@ -155,6 +155,7 @@ export const getBreadCrumbTrailFromAnyDirectory = (
 export type CheckedPlanResult = {
   ref: string;
   block: Block | null;
+  type: "assign" | "match" | "satisfy";
   name: string;
   assigned: number;
   possibleAssignments: number;
@@ -225,6 +226,7 @@ export const checkPlan = (
   const recurse = (
     result: SatisfierResult,
     checkedPlanResultList: CheckedPlanResult[],
+    blockType: "assign" | "match" | "satisfy",
     isTopLevel = false
   ) => {
     const currentRef = result.ref;
@@ -232,6 +234,7 @@ export const checkPlan = (
     const checkedPlanResult: CheckedPlanResult = {
       ref: currentRef,
       block: cleanBlock(getBlock(directory, currentRef)),
+      type: blockType,
       name: getBlockName(directory, currentRef),
       assigned: result.added.length,
       possibleAssignments: 0,
@@ -259,7 +262,7 @@ export const checkPlan = (
           }
 
           const block = result.context as SatisfierResult;
-          recurse(block, checkedPlanResult.children);
+          recurse(block, checkedPlanResult.children, "assign");
           block.added.forEach(([moduleCode]) => {
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
@@ -294,7 +297,7 @@ export const checkPlan = (
             checkedPlanResult.showSatisfiedWarnings = false;
           }
 
-          recurse(block, checkedPlanResult.children);
+          recurse(block, checkedPlanResult.children, "match");
           block.added.forEach(([moduleCode]) => {
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
@@ -320,7 +323,7 @@ export const checkPlan = (
             return;
           }
 
-          recurse(block, checkedPlanResult.children);
+          recurse(block, checkedPlanResult.children, "satisfy");
         });
       }
     });
@@ -350,7 +353,7 @@ export const checkPlan = (
   };
 
   const checkedPlanResultList: CheckedPlanResult[] = [];
-  recurse(checkedPlan, checkedPlanResultList, true);
+  recurse(checkedPlan, checkedPlanResultList, "assign", true);
 
   return {
     results: modules,
