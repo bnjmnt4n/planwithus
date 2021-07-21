@@ -71,8 +71,10 @@ export const Item = ({
               justifyContent: "space-around",
             }}
           >
-            {module.code}
-            {itemInfo && ` ${itemInfo.title}`}
+            <b>
+              {module.code}
+              {itemInfo && ` ${itemInfo.title}`}
+            </b>
             <IconButton aria-label="delete" onClick={onRemove}>
               <DeleteIcon />
             </IconButton>
