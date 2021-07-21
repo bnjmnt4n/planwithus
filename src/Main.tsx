@@ -168,20 +168,16 @@ export const Main = (): JSX.Element => {
             variant="permanent"
             anchor="left"
           >
-            <p>Selected block: {getTopLevelBlockName(block)}</p>
+            <p>
+              <strong>Selected block: </strong> {blockToString(block)}
+            </p>
             <Combobox
               items={topLevelBlocks}
               label="Select a block"
               placeholder="Block"
               emptyText="No such block"
               itemKey={(block, index) => `${block[0]}-${block[1]}-${index}`}
-              itemToString={(block) => {
-                const name = getTopLevelBlockName(block);
-                const ay = getTopLevelBlockAY(block);
-                return ay === null
-                  ? name
-                  : `${name} (AY${ay % 100}/${(ay % 100) + 1})`;
-              }}
+              itemToString={blockToString}
               onItemSelected={(block) => setBlock(block)}
             />
             <p>
@@ -223,4 +219,10 @@ export const Main = (): JSX.Element => {
       </DragDropContext>
     </ModuleContextProvider>
   );
+};
+
+const blockToString = (block: readonly [string, string]) => {
+  const name = getTopLevelBlockName(block);
+  const ay = getTopLevelBlockAY(block);
+  return ay === null ? name : `${name} (AY${ay % 100}/${(ay % 100) + 1})`;
 };
