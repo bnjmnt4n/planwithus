@@ -246,6 +246,8 @@ export const checkPlan = (
     };
     checkedPlanResultList.push(checkedPlanResult);
 
+    let isAllAssignmentSatisfied = true;
+
     result.results.forEach((result) => {
       // ASSIGN BLOCKS
       // -------------
@@ -262,6 +264,10 @@ export const checkPlan = (
           }
 
           const block = result.context as SatisfierResult;
+          if (!block.isSatisfied) {
+            isAllAssignmentSatisfied = false;
+          }
+
           recurse(block, checkedPlanResult.children, "assign");
           block.added.forEach(([moduleCode]) => {
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
@@ -308,22 +314,29 @@ export const checkPlan = (
       }
       // SATISFY BLOCKS
       // --------------
-      else if (isSatisfyBlock(result)) {
+      else if (isSatisfyBlock(result) || blockType === "satisfy") {
         if (!result.results.length) {
-          // TODO: is this necessary?
+          const block = (result.context as SatisfierResult) || result;
+          // Only show satisfy warnings for blocks with assigned modules to avoid showing too many warnings.
+          if (
+            checkedPlanResult.showSatisfiedWarnings ||
+            isSatisfyMcBlock(block) ||
+            isAllAssignmentSatisfied
+          ) {
+            recurse(block, checkedPlanResult.children, "satisfy");
+          }
         }
 
         result.results.forEach((result) => {
           const block = (result.context as SatisfierResult) || result;
           // Only show satisfy warnings for blocks with assigned modules to avoid showing too many warnings.
           if (
-            !checkedPlanResult.showSatisfiedWarnings &&
-            !isSatisfyMcBlock(block)
+            checkedPlanResult.showSatisfiedWarnings ||
+            isSatisfyMcBlock(block) ||
+            isAllAssignmentSatisfied
           ) {
-            return;
+            recurse(block, checkedPlanResult.children, "satisfy");
           }
-
-          recurse(block, checkedPlanResult.children, "satisfy");
         });
       }
     });
