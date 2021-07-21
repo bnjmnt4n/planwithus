@@ -1,5 +1,5 @@
 import { Draggable } from "react-beautiful-dnd";
-import { IconButton, Paper } from "@material-ui/core";
+import { Divider, IconButton, Paper } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import { useItemStyles } from "./listStyles";
@@ -34,8 +34,15 @@ export const Item = ({
   const assignedBlock = module?.assignedBlock ?? "";
   const possibleAssignedBlocks = module?.possibleAssignedBlocks ?? [];
 
+  const hasWarnings =
+    !individualModuleInfo || missingPrerequisites || duplicate;
+  const isAssigned = !(
+    assignedBlock === "" && possibleAssignedBlocks.length === 0
+  );
+
+  const isSomeModuleHighlighted = !!highlightedBlock;
   const isCurrentModuleHighlighted =
-    highlightedBlock &&
+    isSomeModuleHighlighted &&
     [assignedBlock, ...possibleAssignedBlocks].some((block) =>
       block.startsWith(highlightedBlock)
     );
@@ -47,55 +54,76 @@ export const Item = ({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={
-            snapshot.isDragging
-              ? classes.dragging
-              : isCurrentModuleHighlighted
-              ? classes.highlighted
-              : classes.idle
-          }
+          className={[
+            classes.common,
+            isSomeModuleHighlighted && !isCurrentModuleHighlighted
+              ? classes.blank
+              : hasWarnings
+              ? classes.warning
+              : isAssigned
+              ? classes.assigned
+              : classes.blank,
+          ].join(" ")}
           elevation={snapshot.isDragging ? 10 : 1}
         >
           <div
             style={{
               display: "flex",
-              justifyContent: "space-around",
+              justifyContent: "space-between",
             }}
           >
-            {module.code}
-            {itemInfo && ` ${itemInfo.title}`}
-            <IconButton aria-label="delete" onClick={onRemove}>
+            <b>
+              {module.code}
+              {itemInfo && ` ${itemInfo.title}`}
+            </b>
+            <IconButton
+              aria-label="delete"
+              onClick={onRemove}
+              style={{ fontSize: "1.3rem" }}
+            >
               <DeleteIcon />
             </IconButton>
           </div>
-          {displayWarnings && (
+          <>
+            {assignedBlock && (
+              <p>
+                Assigned to block:{" "}
+                {getBreadCrumbTrailFromAnyDirectory(assignedBlock).join(" > ")}
+              </p>
+            )}
+            {!!possibleAssignedBlocks.length && (
+              <p>
+                Possible matches:{" "}
+                {possibleAssignedBlocks
+                  .map((blockRef) =>
+                    getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")
+                  )
+                  .join(", ")}
+              </p>
+            )}
+          </>
+          {displayWarnings && hasWarnings && (
             <>
-              {!individualModuleInfo && <p>Loading module information...</p>}
-              {duplicate && <p>Duplicate module</p>}
-              {assignedBlock && (
-                <p>
-                  Assigned to block:{" "}
-                  {getBreadCrumbTrailFromAnyDirectory(assignedBlock).join(
-                    " > "
+              <Divider style={{ margin: "8px 0" }} />
+              {!individualModuleInfo ? (
+                <p>Loading module information...</p>
+              ) : (
+                <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
+                  {duplicate && (
+                    <li>
+                      <p>Duplicate module</p>
+                    </li>
                   )}
-                </p>
-              )}
-              {!!possibleAssignedBlocks.length && (
-                <p>
-                  Possible matches:{" "}
-                  {possibleAssignedBlocks
-                    .map((blockRef) =>
-                      getBreadCrumbTrailFromAnyDirectory(blockRef).join(" > ")
-                    )
-                    .join(", ")}
-                </p>
-              )}
-              {missingPrerequisites && (
-                <p>
-                  Missing prerequisites:
-                  <br />
-                  {printMissingPrerequisites(missingPrerequisites)}
-                </p>
+                  {missingPrerequisites && (
+                    <li>
+                      <p>
+                        Missing prerequisites:
+                        <br />
+                        {printMissingPrerequisites(missingPrerequisites)}
+                      </p>
+                    </li>
+                  )}
+                </ol>
               )}
             </>
           )}

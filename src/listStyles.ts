@@ -1,21 +1,20 @@
 import { makeStyles } from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
 
 export const useItemStyles = makeStyles((theme) => ({
-  idle: {
+  common: {
     userSelect: "none",
     padding: theme.spacing(2),
     margin: `${theme.spacing(1)}px 0`,
+    fontSize: "0.9rem",
+    width: "100%",
   },
-  highlighted: {
-    userSelect: "none",
-    padding: theme.spacing(2),
-    margin: `${theme.spacing(1)}px 0`,
-    backgroundColor: green[200],
+  blank: {
+    backgroundColor: theme.palette.action.disabled,
   },
-  dragging: {
-    userSelect: "none",
-    padding: theme.spacing(2),
-    margin: `${theme.spacing(1)}px 0}`,
+  warning: {
+    backgroundColor: theme.palette.warning.light,
+  },
+  assigned: {
+    backgroundColor: theme.palette.primary.light,
   },
 }));

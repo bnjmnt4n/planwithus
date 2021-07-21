@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQueries, useQuery, UseQueryResult } from "react-query";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { Grid, makeStyles, Typography } from "@material-ui/core";
+import { Drawer, Grid, makeStyles, Typography } from "@material-ui/core";
 
 import { ModuleContextProvider } from "./ModuleContext";
 import { Combobox } from "./Combobox";
@@ -19,10 +19,19 @@ import type { ModuleCondensed, ModuleInformation } from "./types";
 
 const YEARS = [1, 2, 3, 4];
 
+const drawerWidth = 500;
 const useStyles = makeStyles((theme) => ({
   root: {
+    marginLeft: drawerWidth,
     flexGrow: 1,
     padding: theme.spacing(3),
+  },
+  drawer: {
+    width: drawerWidth,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+    padding: 20,
   },
 }));
 
@@ -147,6 +156,38 @@ export const Main = (): JSX.Element => {
               </header>
             )}
           </Droppable>
+          <Drawer
+            className={classes.drawer}
+            classes={{
+              paper: classes.drawerPaper,
+            }}
+            variant="permanent"
+            anchor="left"
+          >
+            <p>Selected block: {getTopLevelBlockName(block)}</p>
+            <Combobox
+              items={topLevelBlocks}
+              label="Select a block"
+              placeholder="Block"
+              emptyText="No such block"
+              itemKey={(block, index) => `${block[0]}-${block[1]}-${index}`}
+              itemToString={(block) => getTopLevelBlockName(block)}
+              onItemSelected={(block) => setBlock(block)}
+            />
+            <p>
+              <b>Info:</b>
+              <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
+                {info.map((item, index) => (
+                  <li key={`${item}-${index}`}>{item}</li>
+                ))}
+              </ol>
+            </p>
+            <CheckedPlanItem
+              key={checkedPlanResult.ref}
+              checkedPlanResult={checkedPlanResult}
+              onMouseOut={() => setHighlightedBlock("")}
+            />
+          </Drawer>
           <Grid
             container
             direction="row"
@@ -154,31 +195,6 @@ export const Main = (): JSX.Element => {
             className={classes.root}
             spacing={3}
           >
-            <div style={{ flex: "1 0 500px", padding: 20 }}>
-              <p>Selected block: {getTopLevelBlockName(block)}</p>
-              <Combobox
-                items={topLevelBlocks}
-                label="Select a block"
-                placeholder="Block"
-                emptyText="No such block"
-                itemKey={(block, index) => `${block[0]}-${block[1]}-${index}`}
-                itemToString={(block) => getTopLevelBlockName(block)}
-                onItemSelected={(block) => setBlock(block)}
-              />
-              <p>
-                <ul>
-                  {info.map((item, index) => (
-                    <li key={`${item}-${index}`}>{item}</li>
-                  ))}
-                </ul>
-              </p>
-              <CheckedPlanItem
-                key={checkedPlanResult.ref}
-                checkedPlanResult={checkedPlanResult}
-                onMouseOut={() => setHighlightedBlock("")}
-              />
-            </div>
-
             <Grid item>
               <Typography variant="h6">Exempted Modules</Typography>
               <ModuleList droppableId="0-0" modules={moduleIndices[0][0]} />
