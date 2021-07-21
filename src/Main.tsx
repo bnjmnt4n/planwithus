@@ -53,7 +53,7 @@ export const Main = (): JSX.Element => {
     ["modules"],
     async () => {
       const request = await fetch(
-        "https://api.nusmods.com/v2/2021-2022/moduleList.json"
+        "https://api.nusmods.com/v2/2020-2021/moduleList.json"
       );
       return request.json();
     }
@@ -65,7 +65,7 @@ export const Main = (): JSX.Element => {
       queryKey: ["module", module.code],
       queryFn: async () => {
         const request = await fetch(
-          `https://api.nusmods.com/v2/2021-2022/modules/${module.code}.json`
+          `https://api.nusmods.com/v2/2020-2021/modules/${module.code}.json`
         );
         return request.json();
       },
