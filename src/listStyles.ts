@@ -11,16 +11,10 @@ export const useItemStyles = makeStyles((theme) => ({
   blank: {
     backgroundColor: theme.palette.action.disabled,
   },
-  idle: {
-    backgroundColor: theme.palette.primary.light,
-  },
-  highlighted: {
-    backgroundColor: theme.palette.secondary.light,
-  },
   warning: {
     backgroundColor: theme.palette.warning.light,
   },
   assigned: {
-    backgroundColor: theme.palette.success.light,
+    backgroundColor: theme.palette.primary.light,
   },
 }));

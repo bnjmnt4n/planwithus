@@ -56,15 +56,13 @@ export const Item = ({
           {...provided.dragHandleProps}
           className={[
             classes.common,
-            isSomeModuleHighlighted
-              ? isCurrentModuleHighlighted
-                ? classes.highlighted
-                : classes.blank
+            isSomeModuleHighlighted && !isCurrentModuleHighlighted
+              ? classes.blank
               : hasWarnings
               ? classes.warning
               : isAssigned
               ? classes.assigned
-              : classes.idle,
+              : classes.blank,
           ].join(" ")}
           elevation={snapshot.isDragging ? 10 : 1}
         >
