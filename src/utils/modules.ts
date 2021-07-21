@@ -1,3 +1,5 @@
+import { YEARS } from "../Main";
+
 import type { DraggableLocation } from "react-beautiful-dnd";
 import type { Module, ModuleList } from "../types";
 
@@ -135,7 +137,11 @@ export const transform = <T>(
   modules: Module[],
   callback: (module: Module, index: number) => T
 ): T[][][] => {
-  const years: T[][][] = Array.from({ length: 5 }, () => [[], [], []]);
+  const years: T[][][] = Array.from({ length: YEARS.length + 1 }, () => [
+    [],
+    [],
+    [],
+  ]);
   modules.forEach((module, index) => {
     years[module.year][module.semester].push(callback(module, index));
   });

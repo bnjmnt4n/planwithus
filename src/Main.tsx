@@ -21,7 +21,7 @@ import {
 import type { DropResult } from "react-beautiful-dnd";
 import type { ModuleCondensed, ModuleInformation } from "./types";
 
-const YEARS = [1, 2, 3, 4];
+export const YEARS = [1, 2, 3, 4, 5];
 
 const drawerWidth = 500;
 const useStyles = makeStyles((theme) => ({
