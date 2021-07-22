@@ -16,7 +16,7 @@
     "@types/react-dom": "^17.0.9",
     "downshift": "^6.1.3",
     "js-yaml": "^4.1.0",
-    "planwithus-lib": "github:wei2912/planwithus-lib#f324133",
+    "planwithus-lib": "github:wei2912/planwithus-lib#8bb5bfa",
     "react": "^17.0.2",
     "react-beautiful-dnd": "^13.1.0",
     "react-dom": "^17.0.2",
