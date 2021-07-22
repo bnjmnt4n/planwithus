@@ -71,7 +71,7 @@ export const CheckedPlanItem = ({
       <div style={{ overflow: "hidden" }}>
         <div onMouseOver={() => setHighlightedBlock(module.ref)}>
           <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
-            {module.name || module.ref}
+            {module.name ? `${module.name} (${module.ref})` : module.ref}
           </h2>
 
           <p>
