@@ -380,13 +380,16 @@ export const checkPlan = (
     if (isTopLevel) {
       result.assigned.forEach(([moduleCode]) => {
         const module = getModule(moduleCode);
-        // Assigned modules should have only 1 potential assignment.
-        if (module.possibleAssignedBlocks?.length !== 1) {
-          throw new Error(
-            `Expected module ${moduleCode} to have been assigned to ${currentRef}`
-          );
-        }
-        module.possibleAssignedBlocks = [];
+        // TODO: revisit this code.
+        // // Assigned modules should have only 1 potential assignment.
+        // if (module.possibleAssignedBlocks?.length !== 1) {
+        //   throw new Error(
+        //     `Expected module ${moduleCode} to have been assigned to ${currentRef}`
+        //   );
+        // }
+        module.possibleAssignedBlocks = module.possibleAssignedBlocks?.filter(
+          (blockRef) => blockRef !== currentRef
+        );
         module.assignedBlock = currentRef;
       });
     }
