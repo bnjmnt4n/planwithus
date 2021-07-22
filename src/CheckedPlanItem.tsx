@@ -35,6 +35,8 @@ export const CheckedPlanItem = ({
   const [isYamlShown, setIsYamlShown] = useState(false);
 
   const showAssignedModules = module.type !== "satisfy";
+  const matchRef = /\/([^/]+)$/.exec(module.ref ?? "") ?? [];
+  const shortRef = matchRef.length > 0 ? matchRef[1] : null;
 
   return (
     <div
@@ -71,7 +73,11 @@ export const CheckedPlanItem = ({
       <div style={{ overflow: "hidden" }}>
         <div onMouseOver={() => setHighlightedBlock(module.ref)}>
           <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
-            {module.name ? `${module.name} (${module.ref})` : module.ref}
+            {module.name
+              ? shortRef
+                ? `${module.name} (${shortRef})`
+                : module.name
+              : module.ref}
           </h2>
 
           <p>

@@ -100,7 +100,10 @@ export const getBlock = (directory: string, blockRef: string): Block | null => {
   return block;
 };
 
-export const getBlockName = (directory: string, blockRef: string): string => {
+export const getBlockName = (
+  directory: string,
+  blockRef: string
+): string | null => {
   const block = getBlock(directory, blockRef);
 
   if (!block) {
@@ -116,18 +119,20 @@ export const getBlockName = (directory: string, blockRef: string): string => {
       return `${ruleType.charAt(0).toUpperCase()}${ruleType.slice(1)} rule`;
     }
 
-    return "(Unnamed)";
+    return null;
   }
 
-  return block.name ?? "(Unnamed)";
+  return block.name ?? null;
 };
 
 // Hack to get a block from any directory since modules don't know which
 // directory they are in.
-export const getBlockNameFromAnyDirectory = (blockRef: string): string => {
+export const getBlockNameFromAnyDirectory = (
+  blockRef: string
+): string | null => {
   for (const directory of Object.keys(DIRECTORIES)) {
     try {
-      return getBlockName(directory, blockRef) || "(Unnamed)";
+      return getBlockName(directory, blockRef);
     } catch (e) {
       continue;
     }
@@ -150,18 +155,23 @@ export const getBreadCrumbTrailFromAnyDirectory = (
   let { length } = blockSegments;
   while (length--) {
     breadCrumbs.unshift(
-      getBlockNameFromAnyDirectory(blockSegments.slice(0, length + 1).join("/"))
+      getBlockNameFromAnyDirectory(
+        blockSegments
+          .slice(0, length + 1)
+          .filter((crumb) => crumb !== null)
+          .join("/")
+      )
     );
   }
 
-  return breadCrumbs;
+  return breadCrumbs.filter((crumb) => crumb != null) as string[];
 };
 
 export type CheckedPlanResult = {
   ref: string;
   block: Block | null;
   type: "assign" | "match" | "satisfy";
-  name: string;
+  name: string | null;
   assigned: number;
   possibleAssignments: number;
   showSatisfiedWarnings: boolean;
