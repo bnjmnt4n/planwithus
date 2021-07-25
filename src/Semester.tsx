@@ -1,7 +1,15 @@
 import { AddModule } from "./AddModule";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, makeStyles, Typography } from "@material-ui/core";
 import { ModuleList } from "./ModuleList";
 import { useModuleContext } from "./ModuleContext";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    "& > *": {
+      marginBottom: theme.spacing(1),
+    },
+  },
+}));
 
 type SemesterProps = {
   year: number;
@@ -14,7 +22,9 @@ export const Semester = ({
   semester,
   moduleIndices,
 }: SemesterProps): JSX.Element => {
+  const styles = useStyles();
   const { getModule } = useModuleContext();
+
   const moduleCredits = moduleIndices[year][semester].reduce(
     (sum, moduleIndex) => {
       const module = getModule(moduleIndex);
@@ -27,9 +37,13 @@ export const Semester = ({
   );
 
   return (
-    <Grid item>
-      <Typography variant="h6">Semester {semester}</Typography>
-      <p style={{ fontWeight: "bold" }}>{moduleCredits} MCs</p>
+    <Grid item className={styles.root}>
+      <div>
+        <Typography variant="h6">Semester {semester}</Typography>
+        <Typography variant="body1">
+          <strong>{moduleCredits} MCs</strong>
+        </Typography>
+      </div>
       <ModuleList
         droppableId={`${year}-${semester}`}
         modules={moduleIndices[year][semester]}

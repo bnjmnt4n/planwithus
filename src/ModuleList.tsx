@@ -8,11 +8,15 @@ import { getModuleId } from "./utils/modules";
 const useListStyles = makeStyles(() => ({
   idle: {
     border: "2px solid transparent",
-    width: 300,
+    borderRadius: 5,
+    width: 310,
+    padding: 5,
   },
   isDraggingOver: {
     border: "2px solid lightgrey",
-    width: 300,
+    borderRadius: 5,
+    width: 310,
+    padding: 5,
   },
 }));
 
