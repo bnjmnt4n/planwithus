@@ -59,18 +59,11 @@ export const Main = (): JSX.Element => {
     }))
   ) as UseQueryResult<ModuleInformation>[];
 
-  const {
-    hasAllData,
-    moduleIndices,
-    modules,
-    checkedResults,
-    // results,
-    info,
-    checkedPlanResult,
-  } = useMemo(
-    () => checks(selectedModules.modules, individualModuleInformation, block),
-    [selectedModules, individualModuleInformation, block]
-  );
+  const { moduleIndices, modules, checkedResults, info, checkedPlanResult } =
+    useMemo(
+      () => checks(selectedModules.modules, individualModuleInformation, block),
+      [selectedModules, individualModuleInformation, block]
+    );
 
   // Used to display drop to remove indicator.
   const [isDragging, setIsDragging] = useState(false);
@@ -143,7 +136,9 @@ export const Main = (): JSX.Element => {
                 className="w-full p-4 text-2xl text-center font-bold"
                 {...provided.droppableProps}
               >
-                <h1>{isDragging ? "Drop to remove" : "plaNwithUS"}</h1>
+                <Typography variant="h4">
+                  {isDragging ? "Drop to remove" : "plaNwithUS"}
+                </Typography>
               </header>
             )}
           </Droppable>
@@ -172,10 +167,6 @@ export const Main = (): JSX.Element => {
               <Year key={year} year={year} moduleIndices={moduleIndices} />
             ))}
           </Grid>
-          <div>
-            {!hasAllData &&
-              "Failed to load module information for all selected modules"}
-          </div>
         </div>
       </DragDropContext>
     </ModuleContextProvider>

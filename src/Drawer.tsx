@@ -1,6 +1,12 @@
+import { useState } from "react";
 import { CheckedPlanItem } from "./CheckedPlanItem";
 import { Combobox } from "./Combobox";
-import { Drawer as MaterialUiDrawer, makeStyles } from "@material-ui/core";
+import {
+  Button,
+  Drawer as MaterialUiDrawer,
+  makeStyles,
+  Typography,
+} from "@material-ui/core";
 
 import { CheckedPlanResult } from "./utils/plan";
 import { getTopLevelBlockAY, getTopLevelBlockName } from "./utils/plan";
@@ -34,6 +40,7 @@ export const Drawer = ({
   setHighlightedBlock,
 }: DrawerProps): JSX.Element => {
   const classes = useStyles();
+  const [shouldShowInfo, setShouldShowInfo] = useState(true);
 
   return (
     <MaterialUiDrawer
@@ -44,9 +51,6 @@ export const Drawer = ({
       variant="permanent"
       anchor="left"
     >
-      <p>
-        <strong>Selected block: </strong> {blockToString(block)}
-      </p>
       <Combobox
         items={topLevelBlocks}
         label="Select a block"
@@ -56,14 +60,29 @@ export const Drawer = ({
         itemToString={blockToString}
         onItemSelected={(block) => setBlock(block)}
       />
-      <p>
-        <b>Info:</b>
-      </p>
-      <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
-        {info.map((item, index) => (
-          <li key={`${item}-${index}`}>{item}</li>
-        ))}
-      </ol>
+
+      <Typography>
+        <strong>Selected block: </strong> {blockToString(block)}
+      </Typography>
+      {shouldShowInfo && (
+        <>
+          <Typography variant="body2" component="p">
+            <b>Info:</b>
+          </Typography>
+          <ol style={{ padding: "0 16px", listStyle: "decimal" }}>
+            {info.map((item, index) => (
+              <li key={`${item}-${index}`}>{item}</li>
+            ))}
+          </ol>
+        </>
+      )}
+
+      <Button
+        size="small"
+        onClick={() => setShouldShowInfo((shouldShowInfo) => !shouldShowInfo)}
+      >
+        Show {shouldShowInfo ? "less" : "more"}
+      </Button>
       <CheckedPlanItem
         key={checkedPlanResult.ref}
         checkedPlanResult={checkedPlanResult}

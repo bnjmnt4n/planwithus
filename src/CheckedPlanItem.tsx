@@ -9,6 +9,7 @@ import { useModuleContext } from "./ModuleContext";
 import { displayYaml } from "./utils/yaml";
 
 import type { CheckedPlanResult } from "./utils/plan";
+import { Button, Paper, Tooltip } from "@material-ui/core";
 
 export const CheckedPlanItem = ({
   checkedPlanResult: module,
@@ -39,99 +40,118 @@ export const CheckedPlanItem = ({
   const shortRef = matchRef.length > 0 ? matchRef[1] : null;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        padding: "10px 0",
-      }}
-      {...props}
-    >
-      <div>
-        {hasChildren ? (
-          <button
-            onClick={() =>
-              setIsChildrenShown((isChildrenShown) => !isChildrenShown)
-            }
-          >
-            {isChildrenShown ? (
-              <KeyboardArrowDownIcon fontSize="small" />
-            ) : (
-              <KeyboardArrowRightIcon fontSize="small" />
-            )}
-          </button>
-        ) : (
-          <RemoveIcon fontSize="small" />
-        )}
-      </div>
-      <div style={{ paddingRight: "8px" }}>
-        {module.satisfied ? (
-          <CheckIcon fontSize="small" style={{ color: green[500] }} />
-        ) : (
-          <CloseIcon fontSize="small" style={{ color: red[500] }} />
-        )}
-      </div>
-      <div style={{ overflow: "hidden" }}>
-        <div onMouseOver={() => setHighlightedBlock(module.ref)}>
-          <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
-            {module.name
-              ? shortRef
-                ? `${module.name} (${shortRef})`
-                : module.name
-              : module.ref}
-          </h2>
-
-          <p>
-            {showAssignedModules && (
-              <>
-                <strong>Assigned modules: </strong>
-                {module.assigned}
-                <br />
-              </>
-            )}
-            {!!module.possibleAssignments && (
-              <>
-                <strong>Possible matches: </strong>
-                {module.possibleAssignments}
-                <br />
-              </>
-            )}
-            {module.message && (
-              <>
-                <strong>Message: </strong>
-                {module.message}
-                <br />
-              </>
-            )}
-            {module.info && (
-              <>
-                <strong>Info: </strong>
-                {module.info}
-                <br />
-              </>
-            )}
-          </p>
-          {hasYaml && (
-            <p>
+    <Paper variant="outlined" square>
+      <div
+        style={{
+          display: "flex",
+          padding: "10px 0",
+        }}
+        onMouseOver={(e) => {
+          e.stopPropagation();
+          setHighlightedBlock(module.ref);
+        }}
+        {...props}
+      >
+        <div>
+          {hasChildren ? (
+            <Tooltip
+              placement="bottom-start"
+              title={isChildrenShown ? `Hide sub-blocks` : `View sub-blocks`}
+            >
               <button
-                onClick={() => setIsYamlShown((isYamlShown) => !isYamlShown)}
+                onClick={() =>
+                  setIsChildrenShown((isChildrenShown) => !isChildrenShown)
+                }
               >
-                <strong>
-                  {isYamlShown ? "Hide schema" : "Display schema"}
-                </strong>
+                {isChildrenShown ? (
+                  <KeyboardArrowDownIcon fontSize="small" />
+                ) : (
+                  <KeyboardArrowRightIcon fontSize="small" />
+                )}
               </button>
-            </p>
+            </Tooltip>
+          ) : (
+            <RemoveIcon fontSize="small" />
           )}
-          {isYamlShown && <pre style={{ overflow: "auto" }}>{blockYaml}</pre>}
         </div>
-
-        {isChildrenShown && (
+        <div style={{ paddingRight: "8px" }}>
+          <Tooltip
+            placement="bottom-start"
+            title={`Block "${module.name || shortRef}" was ${
+              module.satisfied ? "" : " not "
+            }satisfied.`}
+          >
+            {module.satisfied ? (
+              <CheckIcon fontSize="small" style={{ color: green[500] }} />
+            ) : (
+              <CloseIcon fontSize="small" style={{ color: red[500] }} />
+            )}
+          </Tooltip>
+        </div>
+        <div style={{ overflow: "hidden", flex: "1 1 0" }}>
           <div>
-            {visibleChildren.map((module) => (
-              <CheckedPlanItem key={module.ref} checkedPlanResult={module} />
-            ))}
+            <Tooltip
+              placement="bottom-start"
+              title="Hover over blocks in the sidebar to highlight matching modules"
+            >
+              <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
+                {module.name
+                  ? shortRef
+                    ? `${module.name} (${shortRef})`
+                    : module.name
+                  : module.ref}
+              </h2>
+            </Tooltip>
+
+            <p>
+              {showAssignedModules && (
+                <>
+                  <strong>Assigned modules: </strong>
+                  {module.assigned}
+                  <br />
+                </>
+              )}
+              {!!module.possibleAssignments && (
+                <>
+                  <strong>Possible matches: </strong>
+                  {module.possibleAssignments}
+                  <br />
+                </>
+              )}
+              {module.message && (
+                <>
+                  <strong>Message: </strong>
+                  {module.message}
+                  <br />
+                </>
+              )}
+            </p>
+            {hasYaml && (
+              <Tooltip
+                placement="bottom-start"
+                title={`Block schemas state the requirements for matching blocks`}
+              >
+                <Button
+                  onClick={() => setIsYamlShown((isYamlShown) => !isYamlShown)}
+                >
+                  <strong>
+                    {isYamlShown ? "Hide schema" : "Display schema"}
+                  </strong>
+                </Button>
+              </Tooltip>
+            )}
+            {isYamlShown && <pre style={{ overflow: "auto" }}>{blockYaml}</pre>}
           </div>
-        )}
+
+          {isChildrenShown && (
+            <div style={{ width: "100%" }}>
+              {visibleChildren.map((module) => (
+                <CheckedPlanItem key={module.ref} checkedPlanResult={module} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Paper>
   );
 };
