@@ -7,6 +7,19 @@ import type { SatisfierResult } from "planwithus-lib";
 import type { Module, ModuleInformation } from "../types";
 import type { CheckedPlanResult } from "./plan";
 
+const attachModuleInformation = (
+  modules: Module[],
+  data: ModuleInformation[]
+) => {
+  return modules.map((module) => {
+    const moduleInfo = data.find(
+      (moduleInfo) => moduleInfo.moduleCode === module.code
+    );
+
+    return { ...module, moduleInfo: moduleInfo ?? null };
+  });
+};
+
 export const checks = (
   modules: Module[],
   queries: UseQueryResult<ModuleInformation>[],
@@ -22,6 +35,7 @@ export const checks = (
 } => {
   const { hasAllData, data } = cleanQueries(queries);
 
+  modules = attachModuleInformation(modules, data);
   const exemptedModules = modules.filter(
     (module) =>
       module.year === EXEMPTION_YEAR && module.semester === EXEMPTION_SEMESTER
@@ -36,11 +50,10 @@ export const checks = (
   const checkedDupModules = checkDuplicates(selectedModules);
   const checkedPrereqModules = checkPrerequisites(
     checkedDupModules,
-    exemptedModules,
-    data
+    exemptedModules
   );
   const { results, info, checkedPlan, checkedPlanResult } = checkPlan(
-    checkedPrereqModules,
+    checkedPrereqModules.concat(checkDuplicates(exemptedModules)),
     block
   );
 

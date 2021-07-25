@@ -48,7 +48,7 @@ export const ModuleList = ({
             <ModuleItem
               key={getModuleId(getModule(moduleIndex))}
               index={moduleIndex}
-              displayWarnings={droppableId !== "0-0"}
+              displayWarnings={true}
               onRemove={() => removeModule(moduleIndex)}
             />
           ))}

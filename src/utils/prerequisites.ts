@@ -1,10 +1,9 @@
 import { transform } from "./modules";
-import type { Module, ModuleInformation } from "../types";
+import type { Module } from "../types";
 
 export const checkPrerequisites = (
   modulesList: Module[],
-  exemptedModules: Module[],
-  data: ModuleInformation[]
+  exemptedModules: Module[]
 ): Module[] => {
   const modules = transform(modulesList, (module) => module);
   const semesters = modules.flatMap((year) => year);
@@ -26,9 +25,7 @@ export const checkPrerequisites = (
     }
 
     return currSemesterModules.map((module) => {
-      const moduleInfo = data.find(
-        (moduleInfo) => moduleInfo.moduleCode === module.code
-      );
+      const { moduleInfo } = module;
       const prerequisiteTree = moduleInfo?.prereqTree;
       const duplicate = seenModulesSet.has(module.code);
 
@@ -46,13 +43,12 @@ export const checkPrerequisites = (
         if (missingPrerequisites) {
           return {
             ...module,
-            moduleInfo,
             missingPrerequisites,
           };
         }
       }
 
-      return { ...module, moduleInfo: moduleInfo ?? null };
+      return module;
     });
   });
 
