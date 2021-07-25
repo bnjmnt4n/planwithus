@@ -1,7 +1,7 @@
 import { Grid, makeStyles } from "@material-ui/core";
 import { Droppable } from "react-beautiful-dnd";
 
-import { Item } from "./Item";
+import { ModuleItem } from "./ModuleItem";
 import { useModuleContext } from "./ModuleContext";
 import { getModuleId } from "./utils/modules";
 
@@ -41,7 +41,7 @@ export const ModuleList = ({
           {...provided.droppableProps}
         >
           {modules.map((moduleIndex) => (
-            <Item
+            <ModuleItem
               key={getModuleId(getModule(moduleIndex))}
               index={moduleIndex}
               displayWarnings={droppableId !== "0-0"}

@@ -1,25 +1,46 @@
 import { Draggable } from "react-beautiful-dnd";
-import { Divider, IconButton, Paper } from "@material-ui/core";
+import { Divider, IconButton, makeStyles, Paper } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 
-import { useItemStyles } from "./listStyles";
 import { useModuleContext } from "./ModuleContext";
 import { getModuleId } from "./utils/modules";
 import { printMissingPrerequisites } from "./utils/prerequisites";
 import { getBreadCrumbTrailFromAnyDirectory } from "./utils/plan";
 
-type ItemProps = {
+const useStyles = makeStyles((theme) => ({
+  common: {
+    userSelect: "none",
+    padding: theme.spacing(2),
+    margin: `${theme.spacing(1)}px 0`,
+    fontSize: "0.9rem",
+    width: "100%",
+  },
+  blank: {
+    backgroundColor: theme.palette.action.disabled,
+  },
+  warning: {
+    backgroundColor: theme.palette.warning.light,
+  },
+  assigned: {
+    backgroundColor: theme.palette.success.light,
+  },
+  highlighted: {
+    backgroundColor: "#4dabf5",
+  },
+}));
+
+type ModuleItemProps = {
   index: number;
   displayWarnings: boolean;
   onRemove: () => void;
 };
 
-export const Item = ({
+export const ModuleItem = ({
   index,
   displayWarnings,
   onRemove,
-}: ItemProps): JSX.Element => {
-  const classes = useItemStyles();
+}: ModuleItemProps): JSX.Element => {
+  const classes = useStyles();
   const { getModule, highlightedBlock, allModulesInformation } =
     useModuleContext();
 
