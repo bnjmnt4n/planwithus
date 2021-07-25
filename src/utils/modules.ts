@@ -121,7 +121,11 @@ export const move = (
     year: Number(newYear),
     semester: Number(newSemester),
   };
-  modules.splice(droppableDestination.index, 0, newModule);
+  const destinationIndex =
+    droppableDestination.index > startIndex
+      ? droppableDestination.index - 1
+      : droppableDestination.index;
+  modules.splice(destinationIndex, 0, newModule);
 
   return {
     uniqueId,
