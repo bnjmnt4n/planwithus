@@ -1,5 +1,12 @@
 import { Draggable } from "react-beautiful-dnd";
-import { Divider, IconButton, makeStyles, Paper } from "@material-ui/core";
+import {
+  Divider,
+  IconButton,
+  makeStyles,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import { useModuleContext } from "./ModuleContext";
@@ -96,22 +103,37 @@ export const ModuleItem = ({
             style={{
               display: "flex",
               justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            <b>
-              {module.code}
-              {itemInfo && ` ${itemInfo.title}`}
-            </b>
-            <IconButton
-              aria-label="delete"
-              onClick={onRemove}
-              style={{ fontSize: "1.3rem" }}
-            >
-              <DeleteIcon />
-            </IconButton>
+            <Typography variant="body1">
+              <b>
+                {module.code}
+                {itemInfo && ` ${itemInfo.title}`}
+              </b>
+              {moduleCredit && (
+                <span
+                  style={{
+                    fontSize: "90%",
+                    display: "block",
+                    paddingTop: "5px",
+                  }}
+                >
+                  {moduleCredit} MCs
+                </span>
+              )}
+            </Typography>
+            <Tooltip title={`Remove module ${module.code}`}>
+              <IconButton
+                aria-label="delete"
+                onClick={onRemove}
+                style={{ fontSize: "1.3rem" }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
           </div>
           <>
-            {moduleCredit && <p>{moduleCredit} MCs</p>}
             {assignedBlock && (
               <p style={{ fontSize: "90%" }}>
                 {getBreadCrumbTrailFromAnyDirectory(assignedBlock).join(" > ")}
