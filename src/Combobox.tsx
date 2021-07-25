@@ -64,15 +64,18 @@ export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
     itemToString: (item) => (item ? itemToString(item) : ""),
     onInputValueChange: ({ inputValue }) => {
       if (inputValue) {
-        setFilteredItems(
-          items
-            .filter((item) =>
-              itemToString(item)
-                .toLowerCase()
-                .startsWith(inputValue.toLowerCase())
-            )
-            .slice(0, NUM_ITEMS_SHOWN)
+        const inputValueMatch = inputValue.toLowerCase();
+        const filteredItems = items.filter((item) =>
+          itemToString(item).toLowerCase().includes(inputValue.toLowerCase())
         );
+        // Sort by location of match in string: locations closer to front of
+        // string are returned first.
+        filteredItems.sort(
+          (a, b) =>
+            itemToString(a).indexOf(inputValueMatch) -
+            itemToString(b).indexOf(inputValueMatch)
+        );
+        setFilteredItems(filteredItems.slice(0, NUM_ITEMS_SHOWN));
       } else {
         setFilteredItems(items.slice(0, NUM_ITEMS_SHOWN));
       }
