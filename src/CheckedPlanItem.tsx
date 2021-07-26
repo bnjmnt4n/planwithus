@@ -9,7 +9,13 @@ import { useModuleContext } from "./ModuleContext";
 import { displayYaml } from "./utils/yaml";
 
 import type { CheckedPlanResult } from "./utils/plan";
-import { Button, Paper, Tooltip } from "@material-ui/core";
+import { Button, makeStyles, Paper, Tooltip } from "@material-ui/core";
+
+const useStyles = makeStyles((theme) => ({
+  button: {
+    marginTop: theme.spacing(1),
+  },
+}));
 
 export const CheckedPlanItem = ({
   checkedPlanResult: module,
@@ -17,6 +23,7 @@ export const CheckedPlanItem = ({
 }: {
   checkedPlanResult: CheckedPlanResult;
 } & React.HTMLProps<HTMLDivElement>): JSX.Element => {
+  const classes = useStyles();
   const { setHighlightedBlock } = useModuleContext();
 
   // Hide match blocks and satisfy blocks which are satisfied.
@@ -166,11 +173,12 @@ export const CheckedPlanItem = ({
                 title={`Block schemas state the requirements for matching blocks`}
               >
                 <Button
+                  className={classes.button}
+                  size="small"
+                  variant="outlined"
                   onClick={() => setIsYamlShown((isYamlShown) => !isYamlShown)}
                 >
-                  <strong>
-                    {isYamlShown ? "Hide schema" : "Display schema"}
-                  </strong>
+                  {isYamlShown ? "Hide schema" : "Display schema"}
                 </Button>
               </Tooltip>
             )}

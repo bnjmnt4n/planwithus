@@ -11,16 +11,18 @@ import {
 import { CheckedPlanResult } from "./utils/plan";
 import { getTopLevelBlockAY, getTopLevelBlockName } from "./utils/plan";
 import { useModuleContext } from "./ModuleContext";
-import { EXEMPTION_YEAR } from "./utils/modules";
 
 export const DRAWER_WIDTH = 500;
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   drawer: {
     width: DRAWER_WIDTH,
   },
   drawerPaper: {
     width: DRAWER_WIDTH,
     padding: 20,
+    "& > *": {
+      marginBottom: theme.spacing(1),
+    },
   },
 }));
 
@@ -47,25 +49,31 @@ export const Drawer = ({
   const [shouldShowInfo, setShouldShowInfo] = useState(true);
 
   const { getModule } = useModuleContext();
-  const moduleCredits = moduleIndices
-    .filter((_, year) => year !== EXEMPTION_YEAR)
-    .reduce((sum, year) => {
-      return (
-        sum +
-        year.reduce((sum, semester) => {
-          return (
-            sum +
-            semester.reduce((sum, moduleIndex) => {
-              const module = getModule(moduleIndex);
-              const moduleCredit =
-                parseInt(module?.moduleInfo?.moduleCredit ?? "0") || 0;
+  const moduleCount = moduleIndices.reduce((sum, year) => {
+    return (
+      sum +
+      year.reduce((sum, semester) => {
+        return sum + semester.reduce((sum) => sum + 1, 0);
+      }, 0)
+    );
+  }, 0);
+  const moduleCredits = moduleIndices.reduce((sum, year) => {
+    return (
+      sum +
+      year.reduce((sum, semester) => {
+        return (
+          sum +
+          semester.reduce((sum, moduleIndex) => {
+            const module = getModule(moduleIndex);
+            const moduleCredit =
+              parseInt(module?.moduleInfo?.moduleCredit ?? "0") || 0;
 
-              return sum + moduleCredit;
-            }, 0)
-          );
-        }, 0)
-      );
-    }, 0);
+            return sum + moduleCredit;
+          }, 0)
+        );
+      }, 0)
+    );
+  }, 0);
 
   return (
     <MaterialUiDrawer
@@ -77,6 +85,8 @@ export const Drawer = ({
       anchor="left"
     >
       <Combobox
+        keepInput
+        selectedValue={block}
         items={topLevelBlocks}
         label="Select a block"
         placeholder="Block"
@@ -90,7 +100,8 @@ export const Drawer = ({
         <strong>Selected block: </strong> {blockToString(block)}
       </Typography>
       <Typography>
-        <b>Total MCs:</b> {moduleCredits}
+        <b>Selected modules:</b> {moduleCount}{" "}
+        <span style={{ fontSize: "90%" }}>({moduleCredits} MCs)</span>
       </Typography>
       {shouldShowInfo && (
         <>
@@ -105,12 +116,15 @@ export const Drawer = ({
         </>
       )}
 
-      <Button
-        size="small"
-        onClick={() => setShouldShowInfo((shouldShowInfo) => !shouldShowInfo)}
-      >
-        Show {shouldShowInfo ? "less" : "more"}
-      </Button>
+      <p>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => setShouldShowInfo((shouldShowInfo) => !shouldShowInfo)}
+        >
+          Show {shouldShowInfo ? "less" : "more"}
+        </Button>
+      </p>
       <CheckedPlanItem
         key={checkedPlanResult.ref}
         checkedPlanResult={checkedPlanResult}

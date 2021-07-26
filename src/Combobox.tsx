@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCombobox } from "downshift";
 import {
   IconButton,
@@ -12,6 +12,8 @@ import {
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 type ComboboxProps<T> = {
+  keepInput?: boolean;
+  selectedValue?: T;
   items: T[];
   label: string;
   placeholder: string;
@@ -31,6 +33,8 @@ const useComboboxStyles = makeStyles(() => ({
 const NUM_ITEMS_SHOWN = 50;
 
 export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
+  keepInput,
+  selectedValue,
   items,
   label,
   placeholder,
@@ -84,12 +88,21 @@ export const Combobox: <T>(props: ComboboxProps<T>) => JSX.Element = ({
       // Trigger callback to add module on selection, and reset the combobox.
       if (selectedItem) {
         onItemSelected(selectedItem);
-        setInputValue("");
         // TODO: better way to reset currently selected item?
-        (selectItem as unknown as (item: null) => void)(null);
+        if (!keepInput) {
+          setInputValue("");
+          (selectItem as unknown as (item: null) => void)(null);
+        }
       }
     },
   });
+
+  useEffect(() => {
+    if (selectedValue) {
+      setInputValue(itemToString(selectedValue));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedValue]);
 
   return (
     <div className="w-full">
