@@ -149,6 +149,7 @@ export const Main = (): JSX.Element => {
             block={block}
             setBlock={setBlock}
             setHighlightedBlock={setHighlightedBlock}
+            moduleIndices={moduleIndices}
           />
           <Grid
             container

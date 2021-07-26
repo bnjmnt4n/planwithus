@@ -10,6 +10,8 @@ import {
 
 import { CheckedPlanResult } from "./utils/plan";
 import { getTopLevelBlockAY, getTopLevelBlockName } from "./utils/plan";
+import { useModuleContext } from "./ModuleContext";
+import { EXEMPTION_YEAR } from "./utils/modules";
 
 export const DRAWER_WIDTH = 500;
 const useStyles = makeStyles(() => ({
@@ -29,6 +31,7 @@ type DrawerProps = {
   block: readonly [string, string];
   setBlock: React.Dispatch<React.SetStateAction<readonly [string, string]>>;
   setHighlightedBlock: React.Dispatch<React.SetStateAction<string>>;
+  moduleIndices: number[][][];
 };
 
 export const Drawer = ({
@@ -38,9 +41,31 @@ export const Drawer = ({
   block,
   setBlock,
   setHighlightedBlock,
+  moduleIndices,
 }: DrawerProps): JSX.Element => {
   const classes = useStyles();
   const [shouldShowInfo, setShouldShowInfo] = useState(true);
+
+  const { getModule } = useModuleContext();
+  const moduleCredits = moduleIndices
+    .filter((_, year) => year !== EXEMPTION_YEAR)
+    .reduce((sum, year) => {
+      return (
+        sum +
+        year.reduce((sum, semester) => {
+          return (
+            sum +
+            semester.reduce((sum, moduleIndex) => {
+              const module = getModule(moduleIndex);
+              const moduleCredit =
+                parseInt(module?.moduleInfo?.moduleCredit ?? "0") || 0;
+
+              return sum + moduleCredit;
+            }, 0)
+          );
+        }, 0)
+      );
+    }, 0);
 
   return (
     <MaterialUiDrawer
@@ -63,6 +88,9 @@ export const Drawer = ({
 
       <Typography>
         <strong>Selected block: </strong> {blockToString(block)}
+      </Typography>
+      <Typography>
+        <b>Total MCs:</b> {moduleCredits}
       </Typography>
       {shouldShowInfo && (
         <>
