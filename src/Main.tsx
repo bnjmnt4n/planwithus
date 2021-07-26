@@ -136,9 +136,16 @@ export const Main = (): JSX.Element => {
                 className="w-full p-4 text-2xl text-center font-bold"
                 {...provided.droppableProps}
               >
-                <Typography variant="h4">
-                  {isDragging ? "Drop to remove" : "plaNwithUS"}
-                </Typography>
+                {isDragging ? (
+                  <Typography color="secondary" variant="h4">
+                    Drop to remove
+                  </Typography>
+                ) : (
+                  <Typography style={{ whiteSpace: "nowrap" }} variant="h4">
+                    pla<span style={{ color: "#ef7c00" }}>N</span>with
+                    <span style={{ color: "#ef7c00" }}>US</span>
+                  </Typography>
+                )}
               </header>
             )}
           </Droppable>
