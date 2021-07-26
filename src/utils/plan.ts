@@ -172,7 +172,7 @@ export type CheckedPlanResult = {
   block: Block | null;
   type: "assign" | "match" | "satisfy";
   name: string | null;
-  assigned: number;
+  assigned: [string, number][];
   possibleAssignments: [string, number][];
   showSatisfiedWarnings: boolean;
   satisfied: boolean;
@@ -251,7 +251,7 @@ export const checkPlan = (
       block: cleanBlock(getBlock(directory, currentRef)),
       type: blockType,
       name: getBlockName(directory, currentRef),
-      assigned: result.added.length,
+      assigned: [...result.added],
       possibleAssignments: [],
       showSatisfiedWarnings: true,
       satisfied: result.isSatisfied,
@@ -399,10 +399,18 @@ export const checkPlan = (
         //     `Expected module ${moduleCode} to have been assigned to ${currentRef}`
         //   );
         // }
-        module.possibleAssignedBlocks = module.possibleAssignedBlocks?.filter(
-          (blockRef) => blockRef !== currentRef
-        );
-        module.assignedBlock = currentRef;
+        if (
+          module.possibleAssignedBlocks?.length === 1 &&
+          module.possibleAssignedBlocks[0].startsWith(currentRef)
+        ) {
+          module.assignedBlock = module.possibleAssignedBlocks[0];
+          module.possibleAssignedBlocks = [];
+        } else {
+          module.possibleAssignedBlocks = module.possibleAssignedBlocks?.filter(
+            (blockRef) => blockRef !== currentRef
+          );
+          module.assignedBlock = currentRef;
+        }
       });
     }
   };

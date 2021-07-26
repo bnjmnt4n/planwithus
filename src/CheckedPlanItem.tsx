@@ -103,11 +103,28 @@ export const CheckedPlanItem = ({
                 <>
                   <Tooltip
                     placement="bottom-start"
-                    title={`Modules are assigned to a block when the block is able to match all of its requirements.`}
+                    title={`Modules are assigned to a block when the block is able to match all of its requirements.
+
+                    The following modules were assigned: ${module.assigned
+                      .map(([moduleCode]) => moduleCode)
+                      .join(", ")}`}
                   >
                     <strong>Assigned modules: </strong>
                   </Tooltip>
-                  {module.assigned}
+                  {module.assigned.length}
+                  {!!module.assigned.length && (
+                    <>
+                      {" "}
+                      <span style={{ fontSize: "90%" }}>
+                        (
+                        {module.assigned.reduce(
+                          (sum, [, moduleCredits]) => sum + moduleCredits,
+                          0
+                        )}{" "}
+                        MCs)
+                      </span>
+                    </>
+                  )}
                   <br />
                 </>
               )}
