@@ -14,6 +14,7 @@ import { Button, makeStyles, Paper, Tooltip } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   button: {
     marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
   },
 }));
 
