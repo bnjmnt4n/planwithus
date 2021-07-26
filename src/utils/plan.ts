@@ -173,7 +173,7 @@ export type CheckedPlanResult = {
   type: "assign" | "match" | "satisfy";
   name: string | null;
   assigned: number;
-  possibleAssignments: number;
+  possibleAssignments: [string, number][];
   showSatisfiedWarnings: boolean;
   satisfied: boolean;
   message?: string;
@@ -252,7 +252,7 @@ export const checkPlan = (
       type: blockType,
       name: getBlockName(directory, currentRef),
       assigned: result.added.length,
-      possibleAssignments: 0,
+      possibleAssignments: [],
       showSatisfiedWarnings: true,
       satisfied: result.isSatisfied,
       message: result.message,
@@ -284,14 +284,17 @@ export const checkPlan = (
           }
 
           recurse(block, checkedPlanResult.children, "assign");
-          block.added.forEach(([moduleCode]) => {
+          block.added.forEach(([moduleCode, moduleCredits]) => {
             // TODO: don't allow satisfy blocks to assign.
             if (/\/satisfy(\/|$)/.test(currentRef)) {
               return;
             }
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
-              checkedPlanResult.possibleAssignments++;
+              checkedPlanResult.possibleAssignments.push([
+                moduleCode,
+                moduleCredits,
+              ]);
             }
           });
         });
@@ -307,14 +310,17 @@ export const checkPlan = (
             checkedPlanResult.showSatisfiedWarnings = false;
           }
 
-          result.added.forEach(([moduleCode]) => {
+          result.added.forEach(([moduleCode, moduleCredits]) => {
             // TODO: don't allow satisfy blocks to assign.
             if (/\/satisfy(\/|$)/.test(currentRef)) {
               return;
             }
             addPossibleAssignedBlockToModule(moduleCode, result.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
-              checkedPlanResult.possibleAssignments++;
+              checkedPlanResult.possibleAssignments.push([
+                moduleCode,
+                moduleCredits,
+              ]);
             }
           });
         }
@@ -327,14 +333,17 @@ export const checkPlan = (
           }
 
           recurse(block, checkedPlanResult.children, "match");
-          block.added.forEach(([moduleCode]) => {
+          block.added.forEach(([moduleCode, moduleCredits]) => {
             // TODO: don't allow satisfy blocks to assign.
             if (/\/satisfy(\/|$)/.test(currentRef)) {
               return;
             }
             addPossibleAssignedBlockToModule(moduleCode, block.ref);
             if (!isModuleInList(mainResult.added, moduleCode)) {
-              checkedPlanResult.possibleAssignments++;
+              checkedPlanResult.possibleAssignments.push([
+                moduleCode,
+                moduleCredits,
+              ]);
             }
           });
         });
@@ -369,11 +378,14 @@ export const checkPlan = (
     });
 
     // Add possible assignments from child results as well.
-    checkedPlanResult.possibleAssignments += checkedPlanResult.children.reduce(
-      (sum, { possibleAssignments }: CheckedPlanResult) =>
-        sum + possibleAssignments,
-      0
-    );
+    checkedPlanResult.possibleAssignments =
+      checkedPlanResult.possibleAssignments.concat(
+        checkedPlanResult.children.reduce(
+          (sum, { possibleAssignments }: CheckedPlanResult) =>
+            sum.concat(possibleAssignments),
+          [] as [string, number][]
+        )
+      );
 
     // If this is the top level block, we can finalize the list of assigned
     // modules.

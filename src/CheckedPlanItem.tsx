@@ -90,31 +90,48 @@ export const CheckedPlanItem = ({
         </div>
         <div style={{ overflow: "hidden", flex: "1 1 0" }}>
           <div>
-            <Tooltip
-              placement="bottom-start"
-              title="Hover over blocks in the sidebar to highlight matching modules"
-            >
-              <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
-                {module.name
-                  ? shortRef
-                    ? `${module.name} (${shortRef})`
-                    : module.name
-                  : module.ref}
-              </h2>
-            </Tooltip>
+            <h2 style={{ fontWeight: "bold", fontSize: "1.03em" }}>
+              {module.name
+                ? shortRef
+                  ? `${module.name} (${shortRef})`
+                  : module.name
+                : module.ref}
+            </h2>
 
             <p>
               {showAssignedModules && (
                 <>
-                  <strong>Assigned modules: </strong>
+                  <Tooltip
+                    placement="bottom-start"
+                    title={`Modules are assigned to a block when the block is able to match all of its requirements.`}
+                  >
+                    <strong>Assigned modules: </strong>
+                  </Tooltip>
                   {module.assigned}
                   <br />
                 </>
               )}
-              {!!module.possibleAssignments && (
+              {!!module.possibleAssignments.length && (
                 <>
-                  <strong>Possible matches: </strong>
-                  {module.possibleAssignments}
+                  <Tooltip
+                    placement="bottom-start"
+                    title={`Possible matches are modules which could be assigned to a block but are not due to failure of the block to match.\n
+
+                    The following modules were possible matches: ${module.possibleAssignments
+                      .map(([moduleCode]) => moduleCode)
+                      .join(", ")}`}
+                  >
+                    <strong>Possible matches: </strong>
+                  </Tooltip>
+                  {module.possibleAssignments.length}{" "}
+                  <span style={{ fontSize: "90%" }}>
+                    (
+                    {module.possibleAssignments.reduce(
+                      (sum, [, moduleCredits]) => sum + moduleCredits,
+                      0
+                    )}{" "}
+                    MCs)
+                  </span>
                   <br />
                 </>
               )}
