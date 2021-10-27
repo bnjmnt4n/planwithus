@@ -13,7 +13,7 @@
     "@types/node": "^16.11.1",
     "@types/react": "^17.0.30",
     "@types/react-beautiful-dnd": "^13.1.2",
-    "@types/react-dom": "^17.0.9",
+    "@types/react-dom": "^17.0.10",
     "downshift": "^6.1.7",
     "js-yaml": "^4.1.0",
     "planwithus-lib": "github:wei2912/planwithus-lib#8ecbe24",
